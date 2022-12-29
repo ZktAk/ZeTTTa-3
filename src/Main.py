@@ -20,16 +20,6 @@ def play(env, players, display=False):
 	while True:
 
 		move = players[currentPlayer].move(env.state)
-
-		"""if currentPlayer == PlayerX:
-			move = players[currentPlayer].move(env.state)
-		else:  # currentPlayer == PlayerO
-			state = np.copy(env.state)
-			x = np.copy(state[0])
-			state[0] = np.copy(state[1])
-			state[1] = x
-			move = players[currentPlayer].move(state)"""
-
 		piece = 0 if currentPlayer == PlayerX else 1
 		env.move(piece, move[0], move[1])
 
@@ -62,21 +52,16 @@ def play(env, players, display=False):
 if __name__ == '__main__':
 
 	TicENV = Environments.TicTacToe()
-	players = [Agents.QTable(0.9996), Agents.Random()]
+	players = [Agents.QTable(0.9995), Agents.Random()]
 
 	history = []
 
-	numGames = 100000
-
-	for n in range(numGames):
+	for n in range(10000):
 
 		if (n+1) % (100) == 0:
 			print("Game {}".format(n+1))
-			#print(players[0].moves[0])
 		play(TicENV, players, display=False)
 		history.append(players[0].getPercentages())
-
-	#print("end of games")
 
 	graph = []
 

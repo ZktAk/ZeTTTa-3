@@ -1,6 +1,5 @@
 import math
 import random
-import numpy
 import numpy as np
 
 
@@ -14,12 +13,8 @@ def arrEqualsArr(arr1, arr2):
 
 	elementsThatMatch = arr1.flatten() == arr2.flatten()
 
-	#print(elementsThatMatch)
-
 	for val in elementsThatMatch:
 		if val == False: return False
-
-	#print(elementsThatMatch)
 
 	return True
 
@@ -89,7 +84,6 @@ class QTable(Agent):
 		move = None
 
 		if not containsArray(self.states, state):
-			#print("New State Encountered")
 			self.states.append(np.copy(state))
 			self.moves.append(np.zeros((3,3), int))
 
@@ -104,26 +98,16 @@ class QTable(Agent):
 
 		else:
 			#print("Selecting Best Move\n\n\n")
-			#print(state)
-
 			stateIndex = None
-
-
-			#print("States contains State: {}".format(containsArray(self.states, state)))
 
 			for n in range(len(self.states)):
 				if arrEqualsArr(self.states[n], state):
 					stateIndex = n
 					break
 
-			#print("Found state index to be {}".format(stateIndex))
-
 			while True:  # pick best move
 
-				#stateIndex = self.states.index(state)
-
 				index1D = np.argmax(self.moves[stateIndex])
-				#print(self.moves[stateIndex])
 				row = math.floor(index1D / 3)
 				cell = index1D - (row * 3)
 				if state[-1][row][cell] != 1: self.moves[stateIndex][row][cell] = self.moves[stateIndex].flatten()[self.moves[stateIndex].argmin()] - 1
@@ -131,7 +115,6 @@ class QTable(Agent):
 					move = [row, cell]
 					break
 
-		#print("No Inf Loop")
 		self.gameStates.append(np.copy(state))
 		self.gameMoves.append(move)
 		return move
@@ -166,9 +149,3 @@ class QTable(Agent):
 		self.gameStates = []
 		self.gameMoves = []
 		self.p *= self.gamma
-
-
-
-
-
-

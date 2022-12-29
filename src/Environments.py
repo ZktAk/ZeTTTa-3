@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class Env():
 
 	def __init__(self, x, y, symbols):
@@ -26,10 +27,10 @@ class TicTacToe(Env):
 		                              "0b11001001001", "0b10100100101", "0b10010010011",
 		                              "0b11000100011", "0b10010101001"])
 
-	def move(self, type, row, column):
+	def move(self, piece, row, column):
 
 		if self.legal(row, column):
-			self.state[type][row][column] = 1
+			self.state[piece][row][column] = 1
 			self.state[-1][row][column] = 0
 
 		else:
@@ -94,7 +95,8 @@ class TicTacToe(Env):
 				print("---------")
 
 
-if False:
+z = False
+if z:
 	ttt = TicTacToe()
 	ttt.move(0,0,0)
 	ttt.move(1,0,1)
@@ -115,6 +117,3 @@ if False:
 	ttt.move(1,2,2)
 
 	ttt.print(2)
-
-
-
