@@ -6,7 +6,7 @@ An implementation of a tic-tac-toe solver using various AI and Machine Learning 
 python3 Main.py
 ```
 
-# Currently Implemented Models:
+# Currently Implemented Models
 1. Random
 2. Tabular Q-Learning
 
