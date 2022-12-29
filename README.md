@@ -18,4 +18,5 @@ python3 Main.py
 
 # Test Results
 ![cumulative_acuracy](src/cumulative_accuracy.png)
+
 This graph shows the Win Percentage over 100,000 games of the Tabular Q-Learning model playing against the Random model
