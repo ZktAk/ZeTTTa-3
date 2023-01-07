@@ -1,37 +1,124 @@
 import numpy as np
+import math
+from copy import deepcopy
 
 
-class Env():
+def convertIndexTo2D(index, shape=(3,3)):
+	row = math.floor(index / shape[0])
+	cell = index - (row * shape[1])
+	return row, cell
 
-	def __init__(self, x, y, symbols):
+
+class Action():
+	def __init__(self, player, row, column):
+		self.player = player
+		self.row = row
+		self.column = column
+
+		symbolsDict = {1:0, -1:1}
+		self.symbol = symbolsDict[player]
+
+
+class EnvState():
+
+	def __init__(self, x, y, symbols, State=None):
 
 		self.rows = x
 		self.columns = y
 		self.symbols = symbols
-		self.state = []
+		self.currentPlayer = 1
 
-		for n in range(len(symbols)-1):
-			self.state.append(np.zeros((x,y), int))
+		if State is not None:
+			self.board = State
+		else:
+			self.board = []
 
-		self.state.append(np.ones((x,y), int))
-		self.state = np.array(self.state)
+			for n in range(len(symbols)-1):
+				self.board.append(np.zeros((x, y), int))
+
+			self.board.append(np.ones((x, y), int))
+			self.board = np.array(self.board)
+
+
+	def getCurrentPlayer(self):
+		return self.currentPlayer
+
+
+	def getPossibleActions(self):
+		possibleActions = []
+		for row in range(len(self.board[-1])):
+			for column in range(len(self.board[-1][row])):
+
+				#print("Move: [{},{}]".format(row, column))
+				if self.board[-1][row][column] == 1:
+					possibleActions.append(Action(self.currentPlayer, row, column))
+		return possibleActions
+
+
+	def takeAction(self, action):
+		newState = deepcopy(self)
+
+		#print("Symbol: {}\nAction: [{},{}]".format(action.symbol, action.row, action.column))
+
+		newState.board[action.symbol][action.row][action.column] = 1
+		newState.board[-1][action.row][action.column] = 0
+		newState.currentPlayer = self.currentPlayer * -1
+		return newState
+
+
+	def isWin(self):
+		pass
+
+	def isDraw(self):
+		pass
+
+	def isTerminal(self):
+		pass
+
+
+	def getReward(self):
+		if self.isWin():  # only give a reward if the game is won
+			return self.currentPlayer * -1
+		# after the last action was taken, the current player was switched.
+		# self.currentPlayer * -1 switches to the previous player, the one that just moved.
+		# Thus, we can use the value stored in self.currentPlayer as the reward.
+		return False
+
+
+	def print(self, spaces):
+
+		for n in range(spaces):
+			print("")
+
+		for r in range(self.rows):
+			str = ""
+			for c in range(self.columns):
+				for p in range(len(self.board)):
+					if self.board[p][r][c] == 1:
+						str += self.symbols[p] + " | "
+
+			str = str[0:-3]
+			print(str)
+			if (r != self.rows-1):
+				print("---------")
 
 
 
-class TicTacToe(Env):
+class TicTacToeState(EnvState):
 
-	def __init__(self):
-		super().__init__(3, 3, symbols=["x","o"," "])
+	def __init__(self, state=None):
+		super().__init__(3, 3, symbols=["x","o"," "], State=state)
 
 		self.winPositions = np.array(["0b11110000001", "0b10001110001", "0b10000001111",
 		                              "0b11001001001", "0b10100100101", "0b10010010011",
 		                              "0b11000100011", "0b10010101001"])
 
+	'''
 	def move(self, piece, row, column):
 
 		if self.legal(row, column):
-			self.state[piece][row][column] = 1
-			self.state[-1][row][column] = 0
+			self.board[piece][row][column] = 1
+			self.board[-1][row][column] = 0
 
 		else:
 			print("Specified Move ({},{}) Is Not Legal!".format(row, column))
@@ -45,10 +132,10 @@ class TicTacToe(Env):
 			return False
 
 		return None"""
+	'''
 
-
-	def legal(self, row, column):
-		return self.state[-1][row][column] == 1
+	"""def legal(self, row, column):
+		return self.board[-1][row][column] == 1"""
 
 
 	def bitboard(self, array):
@@ -63,57 +150,24 @@ class TicTacToe(Env):
 		return bitboard
 
 
-	def win(self):
+	def isWin(self):
 
-		for piece in range(len(self.state)-1):
-			bitboard = self.bitboard(self.state[piece])  # Convert the 2D array to a 1D bitboard
+		for piece in range(len(self.board) - 1):
+			bitboard = self.bitboard(self.board[piece])  # Convert the 2D array to a 1D bitboard
+			#print("Bitboard of Current State: {}".format(bitboard))
 			for pos in self.winPositions:
 				if bin(int(bitboard, 2) & int(pos, 2)) == bin(int(pos, 2)):
-					return True, False, piece
-
-		if self.state[-1].sum() == 0:
-			return False, True, None
-
-		return False, False, None
+					return True
+		return False
 
 
-	def print(self, spaces):
+	def isDraw(self):
 
-		for n in range(spaces):
-			print("")
-
-		for r in range(self.rows):
-			str = ""
-			for c in range(self.columns):
-				for p in range(len(self.state)):
-					if self.state[p][r][c] == 1:
-						str += self.symbols[p] + " | "
-
-			str = str[0:-3]
-			print(str)
-			if (r != self.rows-1):
-				print("---------")
+		if not self.isWin():
+			if self.board[-1].sum() == 0:
+				return True
+		return False
 
 
-z = False
-if z:
-	ttt = TicTacToe()
-	ttt.move(0,0,0)
-	ttt.move(1,0,1)
-	ttt.move(0,0,2)
-	ttt.move(1,1,0)
-	ttt.move(0,1,1)
-	ttt.move(1,1,2)
-	ttt.move(1,2,0)
-	ttt.move(0,2,1)
-	ttt.move(1,2,2)
-
-	ttt.move(1,2,2)
-
-	ttt.print(2)
-
-	ttt.__init__()
-
-	ttt.move(1,2,2)
-
-	ttt.print(2)
+	def isTerminal(self):
+		return self.isDraw() or self.isWin()

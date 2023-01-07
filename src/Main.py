@@ -7,10 +7,10 @@ import matplotlib.pyplot as plt
 
 def play(env, players, display=False):
 
-	env.__init__()  # reset the environment
+	current_state = env()  # reset the environment
 
 	if display:
-		env.print(2)
+		current_state.print(2)
 
 	PlayerX = random.randint(0,1)  # The player with the crosses always goes first.
 	PlayerO = 1 if PlayerX == 0 else 0
@@ -19,18 +19,18 @@ def play(env, players, display=False):
 
 	while True:
 
-		move = players[currentPlayer].move(env.state)
 		piece = 0 if currentPlayer == PlayerX else 1
-		env.move(piece, move[0], move[1])
+		action = players[currentPlayer].move(current_state)
+		current_state = current_state.takeAction(action)
 
 		currentPlayer = PlayerO if currentPlayer == PlayerX else PlayerX
 
 		if display:
-			env.print(1)
+			current_state.print(1)
 
-		win, draw, winner = env.win()
-		if win:
-			if display: print("{} Won!".format(env.symbols[winner]))
+
+		if current_state.isWin():
+			if display: print("{} Won!".format(current_state.symbols[action.symbol]))
 			players[currentPlayer].giveReward(1)
 
 			if currentPlayer == 1:
@@ -40,7 +40,7 @@ def play(env, players, display=False):
 
 			return
 
-		elif draw:
+		elif current_state.isDraw():
 			if display: print("Game is a Draw")
 
 			players[0].giveReward(0)
@@ -51,10 +51,12 @@ def play(env, players, display=False):
 
 if __name__ == '__main__':
 
-	TicENV = Environments.TicTacToe()
-	players = [Agents.QTable(0.9995), Agents.Random()]
+	TicENV = Environments.TicTacToeState
+	players = [Agents.Random(), Agents.Random()]  # Agents.QTable(0.99995)
 
 	history = []
+
+	print("Started...")
 
 	for n in range(10000):
 
@@ -68,7 +70,7 @@ if __name__ == '__main__':
 	for n in history:
 		graph.append(n[0])
 
-	plt.plot(graph)
+	plt.plot(history)
 	plt.xlabel("Number of Games")
 	plt.ylabel("Win percentage over time")
 	plt.savefig("cumulative_accuracy.png")
