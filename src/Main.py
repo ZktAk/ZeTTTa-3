@@ -58,7 +58,7 @@ if __name__ == '__main__':
 
 	print("Started...")
 
-	for n in range(10000):
+	for n in range(100000):
 
 		if (n+1) % (100) == 0:
 			print("Game {}".format(n+1))
