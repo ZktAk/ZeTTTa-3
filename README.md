@@ -21,9 +21,9 @@ python3 Main.py
 
 The following graphs show the Win, Loss, and Draw percentages over 100,000 games of the Tabular Q-Learning model playing against the Random model.
 
-![cumulative_wins](src/cumulative_wins.png)
+![cumulative_wins](src/cumulative_wins.png)  
 Final Win Percentage: 0.73213%  
-![cumulative_losses](src/cumulative_losses.png)
+![cumulative_losses](src/cumulative_losses.png)  
 Final Loss Percentage: 0.16164%  
-![cumulative_draws](src/cumulative_draws.png)
+![cumulative_draws](src/cumulative_draws.png)  
 Final Draw Percentage: 0.10623%
