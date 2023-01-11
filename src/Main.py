@@ -19,7 +19,6 @@ def play(env, players, display=False):
 
 	while True:
 
-		piece = 0 if currentPlayer == PlayerX else 1
 		action = players[currentPlayer].move(current_state)
 		current_state = current_state.takeAction(action)
 
@@ -31,12 +30,12 @@ def play(env, players, display=False):
 
 		if current_state.isWin():
 			if display: print("{} Won!".format(current_state.symbols[action.symbol]))
-			players[currentPlayer].giveReward(1)
+			players[currentPlayer].giveReward(-1)
 
 			if currentPlayer == 1:
-				players[0].giveReward(-1)
+				players[0].giveReward(1)
 			else:
-				players[1].giveReward(-1)
+				players[1].giveReward(1)
 
 			return
 
@@ -52,7 +51,7 @@ def play(env, players, display=False):
 if __name__ == '__main__':
 
 	TicENV = Environments.TicTacToeState
-	players = [Agents.Random(), Agents.Random()]  # Agents.QTable(0.99995)
+	players = [Agents.QTable(0.999939), Agents.Random()]  # Agents.QTable(0.99995)
 
 	history = []
 
@@ -65,22 +64,42 @@ if __name__ == '__main__':
 		play(TicENV, players, display=False)
 		history.append(players[0].getPercentages())
 
-	graph = []
+	winPercentage = []
+	drawPercentage = []
+	lossPercentage = []
 
 	for n in history:
-		graph.append(n[0])
+		winPercentage.append(n[0])
+		drawPercentage.append(n[1])
+		lossPercentage.append(n[2])
 
-	plt.plot(history)
+
+	win = plt.figure()
+	plt.plot(winPercentage)
 	plt.xlabel("Number of Games")
-	plt.ylabel("Win percentage over time")
-	plt.savefig("cumulative_accuracy.png")
+	plt.ylabel("Win Percentage")
+	plt.savefig("cumulative_wins.png")
+
+	draw = plt.figure()
+	plt.plot(drawPercentage)
+	plt.xlabel("Number of Games")
+	plt.ylabel("Draw Percentage")
+	plt.savefig("cumulative_draws.png")
+
+	loss = plt.figure()
+	plt.plot(lossPercentage)
+	plt.xlabel("Number of Games")
+	plt.ylabel("Loss Percentage")
+	plt.savefig("cumulative_losses.png")
 
 	print("Win Percentage: {}%".format(history[-1][0]))
 	print("Loss Percentage: {}%".format(history[-1][2]))
 	print("Draw Percentage: {}%".format(history[-1][1]))
 
-	print("unique game scenarios: {}".format(len(players[0].states)))
-	print("Move Rankings for Starting Position: {}".format(players[0].moves[0]))
+	print("unique game scenarios: {}".format(len(players[0].masterNodes)))
+	for n in range(10):
+		print("Move Rankings for Position {}: {}".format(n, players[0].masterNodes[n].actions.values()))
+	#print("Move Rankings for Starting Position: {}".format(players[0].masterNodes[2].actions.values()))
 
 
 

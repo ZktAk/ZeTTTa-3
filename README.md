@@ -17,6 +17,14 @@ python3 Main.py
 
 
 # Test Results
-![cumulative_acuracy](src/Random_vs_TQL-cumulative_accuracy.png)
 
-This graph shows the Win Percentage over 100,000 games of the Tabular Q-Learning model playing against the Random model
+
+The following graphs show the Win, Loss, and Draw percentages over 100,000 games of the Tabular Q-Learning model playing against the Random model.
+
+![cumulative_wins](src/cumulative_wins.png)
+![cumulative_losses](src/cumulative_losses.png)
+![cumulative_draws](src/cumulative_draws.png)
+
+Final Win Percentage: 0.73213%  
+Final Loss Percentage: 0.16164%  
+Final Draw Percentage: 0.10623%

@@ -1,11 +1,11 @@
 import math
-
+import random
 import numpy as np
 
-player = 1
-symbolsDict = {1:0, -1:1}
-symbol = symbolsDict[player]
+arr1 = np.array([[1,2,3],[4,5,6]])
 
-print(symbol)
+arr2 = np.array([[1,2,3],[4,7,6]])
 
-#hello world
+equal = arr1.flatten() == arr2.flatten()
+
+print(equal)

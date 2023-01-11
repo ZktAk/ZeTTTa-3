@@ -12,11 +12,16 @@ def containsElement(arr, val):
 
 def arrEqualsArr(arr1, arr2):
 
+	#print("arr1: {}".format(arr1.flatten()))
+	#print("arr2: {}".format(arr2.flatten()))
+
 	elementsThatMatch = arr1.flatten() == arr2.flatten()
 
 	for val in elementsThatMatch:
-		if val == False: return False
-
+		if val == False:
+			#print("False\n")
+			return False
+	#print("True\n")
 	return True
 
 
@@ -73,6 +78,31 @@ class Random(Agent):
 		return random.choice(possibleActions)
 
 
+class node():
+	def __init__(self, initialState, data, identifier):
+		"""data: A Dictionary that stores all the data related to the node"""
+
+		self.state = initialState
+		self.dat = data
+		self.id = identifier
+
+		self.PossibleActions = self.state.getPossibleActions()
+
+		self.actions = {}
+
+		for PossibleAction in self.PossibleActions:
+			self.actions[PossibleAction] = 0
+
+
+def locate(identifier, arr):
+	"""Returns the index of the Node with the provided identifier in the provided array if found, else returns False."""
+
+	for n in range(len(arr)):
+		if arrEqualsArr(arr[n].id, identifier):  # if arr[n].id == identifier:
+			return n
+	return False
+
+
 class QTable(Agent):
 
 	def __init__(self, gamma):
@@ -80,51 +110,52 @@ class QTable(Agent):
 
 		self.p = 1
 		self.gamma = gamma
-		self.states = []
+
+		self.masterNodes = []
+		self.gameNodes = []
+		self.gameActions = []
+
+		"""self.states = []
 		self.moves = []
 
 		self.gameStates = []
-		self.gameMoves = []
+		self.gameMoves = []"""
 
 
-	def move(self, state, piece):
+	def move(self, state):
 
-		move = None
+		currentState = node(state, {"score": 0}, identifier=np.copy(state.board))
 
-		if not containsArray(self.states, state):
-			self.states.append(np.copy(state))
-			self.moves.append(np.zeros((3,3), int))
+		index = locate(currentState.id, self.masterNodes)
+		if index == False:
+			self.masterNodes.append(currentState)
+		else:
+			currentState = self.masterNodes[index]
+
+		self.gameNodes.append(currentState)
+
 
 		if random.random() <= self.p:  # <= self.p
-			#print("Selecting Random Move")
-			while True:  # pick random move
-				row = random.randint(0, len(state[-1])-1)
-				cell = random.randint(0, len(state[-1][row])-1)
-				if state[-1][row][cell] == 1:
-					move = [row, cell]
-					break
+			keys = []
+			for key, val in currentState.actions.items():
+				keys.append(key)
+			action = random.choice(keys)
+			self.gameActions.append(action)
+			return action
 
 		else:
-			#print("Selecting Best Move\n\n\n")
-			stateIndex = None
+			best_val = float("-inf")
+			best_actions = []
+			for act, val in currentState.actions.items():
+				if val == best_val:
+					best_actions.append(act)
+				elif val > best_val:
+					best_val = val
+					best_actions = [act]
 
-			for n in range(len(self.states)):
-				if arrEqualsArr(self.states[n], state):
-					stateIndex = n
-					break
-
-			while True:  # pick best move
-
-				index1D = np.argmax(self.moves[stateIndex])
-				row, cell = to2DIndex(index1D, (3, 3))
-				if state[-1][row][cell] != 1: self.moves[stateIndex][row][cell] = self.moves[stateIndex].flatten()[self.moves[stateIndex].argmin()] - 1
-				else:
-					move = [row, cell]
-					break
-
-		self.gameStates.append(np.copy(state))
-		self.gameMoves.append(move)
-		return move
+			action = random.choice(best_actions)
+			self.gameActions.append(action)
+			return action
 
 
 	def giveReward(self, reward):
@@ -139,7 +170,13 @@ class QTable(Agent):
 		elif reward == -1:
 			score = reward
 
-		for s in range(len(self.gameStates)):
+		for n in range(len(self.gameNodes)):
+			actionTaken = self.gameActions[n]
+			#print("before: {}".format(self.gameNodes[n].actions[actionTaken]))
+			self.gameNodes[n].actions[actionTaken] += score
+			#print("after: {}\n".format(self.gameNodes[n].actions[actionTaken]))
+
+		"""for s in range(len(self.gameStates)):
 
 			stateIndex = 0
 
@@ -151,10 +188,10 @@ class QTable(Agent):
 			row = self.gameMoves[s][0]
 			column = self.gameMoves[s][1]
 
-			self.moves[stateIndex][row][column] += score
+			self.moves[stateIndex][row][column] += score"""
 
-		self.gameStates = []
-		self.gameMoves = []
+		self.gameNodes = []
+		self.gameActions = []
 		self.p *= self.gamma
 
 
