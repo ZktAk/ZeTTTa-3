@@ -51,7 +51,7 @@ def play(env, players, display=False):
 if __name__ == '__main__':
 
 	TicENV = Environments.TicTacToeState
-	players = [Agents.QTable(0.999939), Agents.Random()]  # Agents.QTable(0.99995)
+	players = [Agents.QTable(0.99939), Agents.QTable(0.99939)]  # Agents.QTable(0.99995)
 
 	history = []
 
@@ -73,6 +73,12 @@ if __name__ == '__main__':
 		drawPercentage.append(n[1])
 		lossPercentage.append(n[2])
 
+
+	master = plt.figure()
+	plt.plot(history)
+	plt.xlabel("Number of Games")
+	plt.ylabel("Win Percentage")
+	plt.savefig("cumulative_accuracy.png")
 
 	win = plt.figure()
 	plt.plot(winPercentage)
