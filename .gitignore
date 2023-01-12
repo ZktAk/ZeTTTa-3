@@ -2,5 +2,5 @@
 MCTS.py
 Old-Main.py
 Test.py
-Template_MCTS.py
+src/Template_MCTS.py
 cumulative_accuracy.png
