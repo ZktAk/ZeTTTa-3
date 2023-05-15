@@ -19,10 +19,10 @@ python3 Main.py
 # Test Results
 
 
-The following graph shows the Win (blue), Loss (green), and Draw (orange) percentages over 100,000 games of two Tabular Q-Learning models playing against each other.
+The following graph shows the Win (blue), Loss (green), and Draw (orange) percentages over 10,000 games of two Tabular Q-Learning models playing against each other.
 
-![cumulative_wins](src/cumulative_accuracy.png)  
-Final Win Percentage: 1.882%  
-Final Loss Percentage: 2.407%  
-Final Draw Percentage: 95.711%
+![cumulative_accuracy](src/cumulative_accuracy_for_readme.png)  
+Final Win Percentage: 3.33%  
+Final Loss Percentage: 3.74%  
+Final Draw Percentage: 92.93%
 

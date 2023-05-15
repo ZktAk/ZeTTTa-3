@@ -4,16 +4,23 @@ import Environments
 import Agents
 import matplotlib.pyplot as plt
 
+def randomizePlayers():
+	PlayerX = random.randint(0,1)  # The player with the crosses always goes first.
+	PlayerO = abs(PlayerX - 1)  # PlayerO = 1 if PlayerX == 0 else 0
 
-def play(env, players, display=False):
+	return PlayerX, PlayerO
+
+def play(env, players, display=False, Random=True):
 
 	current_state = env()  # reset the environment
 
 	if display:
 		current_state.print(2)
 
-	PlayerX = random.randint(0,1)  # The player with the crosses always goes first.
-	PlayerO = 1 if PlayerX == 0 else 0
+	if Random: PlayerX, PlayerO = randomizePlayers()
+	else:
+		PlayerX = 0
+		PlayerO = 1
 
 	currentPlayer = PlayerX
 
@@ -57,14 +64,14 @@ if __name__ == '__main__':
 
 	print("Started...")
 
-	for n in range(1000):
+	for n in range(10000):
 
-		if (n+1) % (100) == 0:
+		if (n+1) % (500) == 0:
 			print("Game {}".format(n+1))
 		play(TicENV, players, display=False)
 		history.append(players[0].getPercentages())
 
-	play(TicENV, players, display=True)
+	play(TicENV, players, display=True, Random=False)
 
 	winPercentage = []
 	drawPercentage = []
@@ -100,9 +107,9 @@ if __name__ == '__main__':
 	plt.ylabel("Loss Percentage")
 	plt.savefig("cumulative_losses.png")
 
-	print("Win Percentage: {}%".format(history[-1][0]))
-	print("Loss Percentage: {}%".format(history[-1][2]))
-	print("Draw Percentage: {}%".format(history[-1][1]))
+	print("Win Percentage: {}%".format(100*history[-1][0]))
+	print("Loss Percentage: {}%".format(100*history[-1][2]))
+	print("Draw Percentage: {}%".format(100*history[-1][1]))
 
 	print("unique game scenarios: {}".format(len(players[0].masterNodes)))
 	for n in range(10):
