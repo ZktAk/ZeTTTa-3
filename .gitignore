@@ -1,7 +1,7 @@
 .idea
 MCTS.py
 Old-Main.py
-../Test.py
+Test.py
 src/Template_MCTS.py
 cumulative_accuracy.png
 cumulative_draws.png
