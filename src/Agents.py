@@ -314,7 +314,8 @@ class MCTS(Agent):
 		return leaf  # in addition to returning the terminal leaf, we must also return wheither that leaf won, lost, or drawed because we need to know if we should increment the win count of the Root Node
 
 
-	def backpropagate(self, root, end):
+	@staticmethod
+	def backpropagate(root, end):
 
 		node = end
 
@@ -330,7 +331,8 @@ class MCTS(Agent):
 				node.w += 1
 
 
-	def selectBest(self, node):
+	@staticmethod
+	def selectBest(node):
 		best = [0]
 		children = []
 

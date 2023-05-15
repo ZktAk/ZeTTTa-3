@@ -51,18 +51,20 @@ def play(env, players, display=False):
 if __name__ == '__main__':
 
 	TicENV = Environments.TicTacToeState
-	players = [Agents.QTable(0.99939), Agents.QTable(0.99939)]  # Agents.QTable(0.99995)
+	players = [Agents.QTable(0.99083), Agents.QTable(0.99083)]  # Agents.QTable(0.99995) #0.99939
 
 	history = []
 
 	print("Started...")
 
-	for n in range(100000):
+	for n in range(1000):
 
 		if (n+1) % (100) == 0:
 			print("Game {}".format(n+1))
 		play(TicENV, players, display=False)
 		history.append(players[0].getPercentages())
+
+	play(TicENV, players, display=True)
 
 	winPercentage = []
 	drawPercentage = []
