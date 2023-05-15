@@ -2,6 +2,7 @@
 MCTS.py
 Old-Main.py
 Test.py
+src/cumulative_accuracy.png
 cumulative_draws.png
 cumulative_losses.png
 cumulative_wins.png
