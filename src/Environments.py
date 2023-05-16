@@ -113,30 +113,6 @@ class TicTacToeState(EnvState):
 		                              "0b11001001001", "0b10100100101", "0b10010010011",
 		                              "0b11000100011", "0b10010101001"])
 
-	'''
-	def move(self, piece, row, column):
-
-		if self.legal(row, column):
-			self.board[piece][row][column] = 1
-			self.board[-1][row][column] = 0
-
-		else:
-			print("Specified Move ({},{}) Is Not Legal!".format(row, column))
-
-		"""win, draw, winner = self.win()
-		if win:
-			print("{} Won!".format(self.symbols[winner]))
-			return True
-		elif draw:
-			print("Game is a Draw")
-			return False
-
-		return None"""
-	'''
-
-	"""def legal(self, row, column):
-		return self.board[-1][row][column] == 1"""
-
 
 	def bitboard(self, array):
 		bitboard = "0b1"

@@ -40,8 +40,6 @@ def to2DIndex(index1D, shape=(3,3)):
 	return row, cell
 
 
-
-
 class Agent():
 	def __init__(self):
 		self.wins = 0
@@ -78,12 +76,11 @@ class Random(Agent):
 		return random.choice(possibleActions)
 
 
-class node():
-	def __init__(self, initialState, data, identifier):
+class qTable_Node():
+	def __init__(self, initialState, identifier):
 		"""data: A Dictionary that stores all the data related to the node"""
 
 		self.state = initialState
-		self.dat = data
 		self.id = identifier
 
 		self.PossibleActions = self.state.getPossibleActions()
@@ -115,16 +112,12 @@ class QTable(Agent):
 		self.gameNodes = []
 		self.gameActions = []
 
-		"""self.states = []
-		self.moves = []
-
-		self.gameStates = []
-		self.gameMoves = []"""
-
-
 	def move(self, state):
 
-		currentState = node(state, {"score": 0}, identifier=np.copy(state.board))
+		action = None
+		actions = []
+
+		currentState = qTable_Node(state, identifier=np.copy(state.board))
 
 		index = locate(currentState.id, self.masterNodes)
 		if index == False:
@@ -134,29 +127,21 @@ class QTable(Agent):
 
 		self.gameNodes.append(currentState)
 
-
-		if random.random() <= self.p:  # <= self.p
-			keys = []
-			for key, val in currentState.actions.items():
-				keys.append(key)
-			action = random.choice(keys)
-			self.gameActions.append(action)
-			return action
-
+		if random.random() <= self.p:
+			for act, val in currentState.actions.items():
+				actions.append(act)
 		else:
 			best_val = float("-inf")
-			best_actions = []
 			for act, val in currentState.actions.items():
 				if val == best_val:
-					best_actions.append(act)
+					actions.append(act)
 				elif val > best_val:
 					best_val = val
-					best_actions = [act]
+					actions = [act]
 
-			action = random.choice(best_actions)
-			self.gameActions.append(action)
-			return action
-
+		action = random.choice(actions)
+		self.gameActions.append(action)
+		return action
 
 	def giveReward(self, reward):
 		super().giveReward(reward)
@@ -172,30 +157,14 @@ class QTable(Agent):
 
 		for n in range(len(self.gameNodes)):
 			actionTaken = self.gameActions[n]
-			#print("before: {}".format(self.gameNodes[n].actions[actionTaken]))
 			self.gameNodes[n].actions[actionTaken] += score
-			#print("after: {}\n".format(self.gameNodes[n].actions[actionTaken]))
-
-		"""for s in range(len(self.gameStates)):
-
-			stateIndex = 0
-
-			for n in range(len(self.states)):
-				if arrEqualsArr(self.states[n], self.gameStates[s]):
-					stateIndex = n
-					break
-
-			row = self.gameMoves[s][0]
-			column = self.gameMoves[s][1]
-
-			self.moves[stateIndex][row][column] += score"""
 
 		self.gameNodes = []
 		self.gameActions = []
 		self.p *= self.gamma
 
 
-class Node():
+class MCTS_Node():
 	def __init__(self, env, state=None, row=None, column=None, parent=None, id=1):
 		self.n = 0  # represents the number of times the node has been considered (visit count)
 		self.w = 0  # represents the number of wins considered for that node
@@ -243,7 +212,7 @@ class Node():
 			debug += "\n" + temp
 
 			if self.stateENV.legal(row, column):
-				self.childNodes.append(Node(env=self.environment, row=row, column=column, parent=self, id=self.symbol*-1))
+				self.childNodes.append(MCTS_Node(env=self.environment, row=row, column=column, parent=self, id=self.symbol * -1))
 
 		if len(self.childNodes)==0:
 			print(self.stateENV.board)
@@ -361,7 +330,7 @@ class MCTS(Agent):
 	def move(self, state, piece):
 
 		rootSymbol = [1, -1][piece]
-		rootNode = Node(state=state, env=self.ENV, id=rootSymbol)
+		rootNode = MCTS_Node(state=state, env=self.ENV, id=rootSymbol)
 		rootNode.generate()
 
 		for n in range(100):
