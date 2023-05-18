@@ -26,7 +26,6 @@ The following graph shows the Win, Loss, and Draw percentages over 10,000 traini
 Final Win Percentage (Blue): 27.57%  
 Final Loss Percentage (Green): 1.78%  
 Final Draw Percentage (Orange): 70.65%
-
 ***
 **Q-Table vs Q-Table**
 
