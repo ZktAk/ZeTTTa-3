@@ -206,7 +206,7 @@ class MCTS_Node():
 		return success_rate
 
 
-	def UCT(self, c=math.sqrt(2.0)):
+	def UCT(self, c=math.sqrt(2)):
 
 		if self.visits == 0:
 			return math.inf
@@ -234,24 +234,23 @@ class MCTS(Agent):
 
 	def select(self, node, c=math.sqrt(2)):
 
-		current_node = node
+		# this method simulates calculate_value() and calculate_values() and choose_move()
+		node.init_children()
 
-		while current_node.children is not None and len(current_node.children) != 0:
+		best_val = float("-inf")
+		nodes = []
 
-			best_val = float("-inf")
-			nodes = []
+		for child in node.children:  # calculate_values()
+			value = child.UCT(c)  # calculate_value()
+			if value > best_val:
+				nodes = [child]
+				best_val = value
+			if value == best_val:
+				nodes.append(child)
 
-			for child in current_node.children:
-				value = child.UCT(c)
-				if value > best_val:
-					nodes = [child]
-					best_val = value
-				if value == best_val:
-					nodes.append(child)
+		best_node = random.choice(nodes)  # choose_move()
 
-			current_node = random.choice(nodes)
-
-		return current_node
+		return best_node
 
 	def expand(self, node):
 		node.init_children()
@@ -263,17 +262,15 @@ class MCTS(Agent):
 		new_node = self.select(node)
 		return new_node
 
-	def simulate(self, node):
-		state = node.state
+
+	def perform_playout(self, node):
+
 		current_node = node
-		rand_agent = Random()
 
-		while not state.isTerminal:
+		#print(current_node.state.isTerminal())
 
-			action = rand_agent.move(state)
-			state = state.takeAction(action)
-			current_node = MCTS_Node(state, current_node)
-
+		while not current_node.state.isTerminal():
+			current_node = self.select(current_node)
 		return current_node
 
 	def backprop(self, winner_id, leaf_node, initial_node):
@@ -293,19 +290,16 @@ class MCTS(Agent):
 		for n in range(iterations):
 			parent_Node = initial_node
 
-			selected_node = self.select(parent_Node)
+			winning_node = self.perform_playout(parent_Node)
 
-			expanded_node = self.expand(selected_node)
-			expanded_node = self.nodes.setdefault(str(expanded_node.state.board), expanded_node)
+			winning_player = winning_node.id
 
-			winning_node = self.simulate(expanded_node)
-
-			winning_player = winning_node.id * -1
-
-			self.backprop(winning_player, expanded_node, initial_node)
+			self.backprop(winning_player, winning_node, parent_Node)
 
 
 	def pick(self, node):
+
+		node.init_children()
 
 		best_val = float("-inf")
 		nodes = []
@@ -327,7 +321,7 @@ class MCTS(Agent):
 
 		parent_Node = self.nodes.setdefault(str(state.board), MCTS_Node(state, player=1))
 
-		self.think(parent_Node, 200)
+		self.think(parent_Node, 20)
 		action = self.pick(parent_Node)
 
 		return action

@@ -9,20 +9,31 @@ python3 Main.py
 # Currently Implemented Models
 1. Random
 2. Tabular Q-Learning
+3. Monte Carlo Tree Search (MCTS)
 
-# Planned Models
-1. Monte Carlo Tree Search (MCTS)
-2. Neural Network
-3. Convelutional Neural Network + MCTS
+# Planned Models 
+1. Neural Network
+2. Convelutional Neural Network + MCTS
 
 
 # Test Results
+***
+**MCTS vs Q-Table**
 
+The following graph shows the Win, Loss, and Draw percentages over 10,000 training games of a standard **Tabular Q-Learning** model and an **MCTS** model, configured with a 20 playout per move sampling rate, playing against each other.
 
-The following graph shows the Win (blue), Loss (green), and Draw (orange) percentages over 10,000 games of two Tabular Q-Learning models playing against each other.
+![cumulative_accuracy](Q-Table vs MCTS Cumulative Accuracy Graph.png)  
+Final Win Percentage (Blue): 27.57%  
+Final Loss Percentage (Green): 1.78%  
+Final Draw Percentage (Orange): 70.65%
 
-![cumulative_accuracy](cumulative_accuracy_for_readme.png)  
-Final Win Percentage: 3.33%  
-Final Loss Percentage: 3.74%  
-Final Draw Percentage: 92.93%
+***
+**Q-Table vs Q-Table**
+
+The following graph shows the Win, Loss, and Draw percentages over 10,000 training games of two **Tabular Q-Learning** models playing against each other.
+
+![cumulative_accuracy](Q-Table vs Q-Tables Cumulative Accuracy Graph.png)  
+Final Win Percentage (Blue): 3.33%  
+Final Loss Percentage (Green): 3.74%  
+Final Draw Percentage (Orange): 92.93%
 

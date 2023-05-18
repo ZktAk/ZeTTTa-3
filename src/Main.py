@@ -61,7 +61,7 @@ def play(env, players, display=False, Random=True):
 if __name__ == '__main__':
 
     TicENV = Environments.TicTacToeState
-    players = [Agents.Random(), Agents.MCTS()]  # Agents.QTable(0.99083)
+    players = [Agents.QTable(0.99083), Agents.MCTS()]  # Agents.QTable(0.99083)
 
     history = []
 
@@ -69,9 +69,9 @@ if __name__ == '__main__':
 
     play(TicENV, [players[1], players[0]], display=False, Random=False)
 
-    for n in range(1000):
+    for n in range(10000):
 
-        if (n + 1) % (100) == 0:
+        if (n + 1) % (50) == 0:
             print("Game {}".format(n + 1))
         play(TicENV, players, display=False)
         history.append(players[0].getPercentages())
@@ -117,7 +117,7 @@ if __name__ == '__main__':
 
     #print("unique game scenarios: {} | {}".format(len(players[0].masterNodes),len(players[1].nodes)))
 
-    mcts = players[1]
+    '''mcts = players[1]
     starting_node = list(mcts.nodes.values())[0]
     visits = []
     scores = []
@@ -127,14 +127,14 @@ if __name__ == '__main__':
     for child in starting_node.children:
         visits.append(child.visits)
         scores.append(child.winsOrDraws)
-        UCT.append(round(child.UCT() * 1000)/1000)
-        explore.append(round(child.exploration_rate() * 1000)/1000)
-        success.append(round(child.success_rate() * 1000)/1000)
+        UCT.append(child.UCT())
+        explore.append(child.exploration_rate())
+        success.append(child.success_rate())
     print("\nMCTS Initial State Action Visits: {}".format(visits))
     print("MCTS Initial State Action Scores: {}".format(scores))
     print("MCTS Initial State Action explore: {}".format(explore))
     print("MCTS Initial State Action success: {}".format(success))
-    print("MCTS Initial State Action UCT: {}\n".format(UCT))
+    print("MCTS Initial State Action UCT: {}\n".format(UCT))'''
 
 
     for n in range(10):
