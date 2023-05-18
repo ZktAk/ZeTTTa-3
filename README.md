@@ -17,7 +17,7 @@ python3 Main.py
 
 
 # Test Results
-***
+
 **MCTS vs Q-Table**
 
 The following graph shows the Win, Loss, and Draw percentages over 10,000 training games of a standard **Tabular Q-Learning** model and an **MCTS** model, configured with a 20 playout per move sampling rate, playing against each other.
