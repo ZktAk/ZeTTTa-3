@@ -1,3 +1,4 @@
+import copy
 import math
 import random
 import numpy as np
@@ -73,6 +74,8 @@ class Random(Agent):
 
 	def move(self, initialState):
 		possibleActions = initialState.getPossibleActions()
+		if len(possibleActions) == 0:
+			return None
 		return random.choice(possibleActions)
 
 
@@ -165,193 +168,169 @@ class QTable(Agent):
 
 
 class MCTS_Node():
-	def __init__(self, env, state=None, row=None, column=None, parent=None, id=1):
-		self.n = 0  # represents the number of times the node has been considered (visit count)
-		self.w = 0  # represents the number of wins considered for that node
 
-		self.environment = env
+	def __init__(self, state, parent=None, player=None, action=None):
 
-		self.symbol = id
-		self.state = state
+		self.state = copy.deepcopy(state)
+
 		self.parent = parent
+		self.visits = 0
+		self.winsOrDraws = 0
+		self.action = action
 
-		self.row = row
-		self.column = column
-
-		self.expanded = False
-
-
-		if parent is not None:
-			self.stateENV = env(state=np.copy(parent.board))
-			self.stateENV.move([1, -1].index(self.symbol), row, column)
-			self.state = self.stateENV.board
+		if player is not None:
+			self.id = player
 		else:
-			self.stateENV = env(state=state)
-			self.state = self.stateENV.board
+			self.id = self.parent.id * -1
 
-		win, draw, winner = self.stateENV.isWin()
-		self.isTerminal = win or draw
+		self.children = None
+
+	def init_children(self):
+
+		if self.children is not None: return
+
+		actions = self.state.getPossibleActions()
+
+		self.children = []
+
+		for action in actions:
+			child_state = copy.deepcopy(self.state).takeAction(action)
+			self.children.append(MCTS_Node(child_state, self, action=action))
 
 
-		self.childNodes = []
+	def value(self):
+		if self.visits == 0: return 0
+
+		score = self.winsOrDraws
+		success_rate = score / self.visits
+		return success_rate
 
 
-	def generate(self):
+	def UCT(self, c=math.sqrt(2.0)):
 
-		#print(self.stateENV.state)
+		if self.visits == 0:
+			return math.inf
 
-		debug = ""
+		success_rate = self.value()
+		exploration_term = c * math.sqrt(math.log(self.parent.visits) / self.visits)
+		UCT = success_rate + exploration_term
+		return UCT
 
-		for n in range(9):
-			row, column = to2DIndex(n, (3, 3))
+	def exploration_rate(self, c=math.sqrt(2)):
+		if self.visits == 0: return math.inf
+		exploration_term = c * math.sqrt(math.log(self.parent.visits) / self.visits)
+		return exploration_term
 
-			temp = str([row, column])
-
-			temp += " is Legal: {}".format(self.stateENV.legal(row, column))
-
-			debug += "\n" + temp
-
-			if self.stateENV.legal(row, column):
-				self.childNodes.append(MCTS_Node(env=self.environment, row=row, column=column, parent=self, id=self.symbol * -1))
-
-		if len(self.childNodes)==0:
-			print(self.stateENV.board)
-			print(debug)
-
-		self.expanded = True
+	def success_rate(self):
+		success_rate = self.value()
+		return success_rate
 
 
 class MCTS(Agent):
-	def __init__(self, env=TicTacToeState):
+
+	def __init__(self):
 		super().__init__()
-		self.ENV = env
-
-
-	def getNode(self, state):
-		pass
-
+		self.nodes = {}
 
 	def select(self, node, c=math.sqrt(2)):
 
-		best_val = float("-inf")
-		children = []
+		current_node = node
 
-		#print(node.childNodes)
+		while current_node.children is not None and len(current_node.children) != 0:
 
-		for childNode in node.childNodes:
+			best_val = float("-inf")
+			nodes = []
 
-			"""
-			row, column = to2DIndex(node.childNodes.index(childNode))
-			print([row, column])
-			"""
+			for child in current_node.children:
+				value = child.UCT(c)
+				if value > best_val:
+					nodes = [child]
+					best_val = value
+				if value == best_val:
+					nodes.append(child)
 
-			UCB1 = math.inf
-			if childNode.n != 0:
-				winrate = childNode.w / childNode.n
-				explorationTerm = c * math.sqrt(math.log(node.n) / childNode.n)
-				UCB1 = winrate + explorationTerm
+			current_node = random.choice(nodes)
 
-			if UCB1 == best_val:
-				children.append(childNode)
-			elif UCB1 > best_val:
-				best_val = UCB1
-				children = [childNode]
-
-		return random.choice(children)
-
+		return current_node
 
 	def expand(self, node):
-		node.generate()
+		node.init_children()
 
-		#print(node.childNodes)
-		leaf = random.choice(node.childNodes)
+		if len(node.children) == 0:
+			return node
 
-
-		return leaf
-
+		# new_node = random.choice(node.children)
+		new_node = self.select(node)
+		return new_node
 
 	def simulate(self, node):
+		state = node.state
+		current_node = node
+		rand_agent = Random()
 
-		leaf = node
+		while not state.isTerminal:
 
-		if not leaf.isTerminal:
-			if not leaf.expanded:
-				leaf.generate()
+			action = rand_agent.move(state)
+			state = state.takeAction(action)
+			current_node = MCTS_Node(state, current_node)
 
-			leaf = random.choice(node.childNodes)
+		return current_node
 
-		return leaf  # in addition to returning the terminal leaf, we must also return wheither that leaf won, lost, or drawed because we need to know if we should increment the win count of the Root Node
+	def backprop(self, winner_id, leaf_node, initial_node):
+		node = leaf_node
+		while node is not None:
+			node.visits += 1
+			if node.id == winner_id:
+				node.winsOrDraws += 1
+			if node is initial_node:
+				break
 
-
-	@staticmethod
-	def backpropagate(root, end):
-
-		node = end
-
-		while node.parent is not None:
-			node.n += 1
-			if node.symbol == end.symbol:
-				node.w += 1
 			node = node.parent
 
-		root.n += 1
 
-		if root.symbol == end.symbol:
-				node.w += 1
+	def think(self, initial_node, iterations=100):
 
+		for n in range(iterations):
+			parent_Node = initial_node
 
-	@staticmethod
-	def selectBest(node):
-		best = [0]
-		children = []
+			selected_node = self.select(parent_Node)
 
-		# print(node.childNodes)
+			expanded_node = self.expand(selected_node)
+			expanded_node = self.nodes.setdefault(str(expanded_node.state.board), expanded_node)
 
-		for childNode in node.childNodes:
+			winning_node = self.simulate(expanded_node)
 
-			row, column = to2DIndex(node.childNodes.index(childNode))
+			winning_player = winning_node.id * -1
 
-			# print([row, column])
-
-			winrate = math.inf
-			if childNode.n != 0:
-				winrate = childNode.w / childNode.n
+			self.backprop(winning_player, expanded_node, initial_node)
 
 
-			if winrate == best[0]:
-				best.append(winrate)
-				children.append(childNode)
-			elif winrate > best[0]:
-				best = [winrate]
-				children = [childNode]
+	def pick(self, node):
 
-		return random.choice(children)
+		best_val = float("-inf")
+		nodes = []
 
-	def move(self, state, piece):
+		for child in node.children:
+			value = child.visits
+			if value > best_val:
+				nodes = [child]
+				best_val = value
+			if value == best_val:
+				nodes.append(child)
 
-		rootSymbol = [1, -1][piece]
-		rootNode = MCTS_Node(state=state, env=self.ENV, id=rootSymbol)
-		rootNode.generate()
+		choice = random.choice(nodes)
+		action = choice.action
 
-		for n in range(100):
+		return action
 
-			firstLeaf = self.select(rootNode)  # this returns a child node of the Root Node based on UCB1
+	def move(self, state):
 
-			if not firstLeaf.isTerminal:
+		parent_Node = self.nodes.setdefault(str(state.board), MCTS_Node(state, player=1))
 
-				secondLeaf = self.expand(firstLeaf)
+		self.think(parent_Node, 200)
+		action = self.pick(parent_Node)
 
-				terminalLeaf = self.simulate(secondLeaf)
-
-				self.backpropagate(rootNode, terminalLeaf)
-
-
-		choice = self.selectBest(rootNode)
-
-		row = choice.row
-		column = choice.column
-
-		return [row, column]
+		return action
 
 
 

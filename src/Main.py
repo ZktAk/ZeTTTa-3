@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 import random
 import Environments
@@ -59,20 +61,22 @@ def play(env, players, display=False, Random=True):
 if __name__ == '__main__':
 
     TicENV = Environments.TicTacToeState
-    players = [Agents.QTable(0.99083), Agents.QTable(0.99083)]  # Agents.QTable(0.99995) #0.99939
+    players = [Agents.Random(), Agents.MCTS()]  # Agents.QTable(0.99083)
 
     history = []
 
     print("Started...")
 
-    for n in range(10000):
+    play(TicENV, [players[1], players[0]], display=False, Random=False)
 
-        if (n + 1) % (500) == 0:
+    for n in range(1000):
+
+        if (n + 1) % (100) == 0:
             print("Game {}".format(n + 1))
         play(TicENV, players, display=False)
         history.append(players[0].getPercentages())
 
-    play(TicENV, players, display=True, Random=False)
+    play(TicENV, [players[1], players[0]], display=True, Random=False)
 
     winPercentage = []
     drawPercentage = []
@@ -111,7 +115,28 @@ if __name__ == '__main__':
     print("Loss Percentage: {}%".format(100 * history[-1][2]))
     print("Draw Percentage: {}%".format(100 * history[-1][1]))
 
-    print("unique game scenarios: {}".format(len(players[0].masterNodes)))
+    #print("unique game scenarios: {} | {}".format(len(players[0].masterNodes),len(players[1].nodes)))
+
+    mcts = players[1]
+    starting_node = list(mcts.nodes.values())[0]
+    visits = []
+    scores = []
+    UCT = []
+    explore = []
+    success = []
+    for child in starting_node.children:
+        visits.append(child.visits)
+        scores.append(child.winsOrDraws)
+        UCT.append(round(child.UCT() * 1000)/1000)
+        explore.append(round(child.exploration_rate() * 1000)/1000)
+        success.append(round(child.success_rate() * 1000)/1000)
+    print("\nMCTS Initial State Action Visits: {}".format(visits))
+    print("MCTS Initial State Action Scores: {}".format(scores))
+    print("MCTS Initial State Action explore: {}".format(explore))
+    print("MCTS Initial State Action success: {}".format(success))
+    print("MCTS Initial State Action UCT: {}\n".format(UCT))
+
+
     for n in range(10):
         print("Move Rankings for Position {}: {}".format(n, players[0].masterNodes[n].actions.values()))
 # print("Move Rankings for Starting Position: {}".format(players[0].masterNodes[2].actions.values()))
