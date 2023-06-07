@@ -20,6 +20,8 @@ python3 Main.py
 
 **MCTS vs Q-Table**
 
+"Monte Carlo is a heuristic. With a heuristic, we are not guaranteed precisely the correct or the best answer, but we can get an approximation that can often be good enough" [nestedsoftware](https://nestedsoftware.com/2019/08/07/tic-tac-toe-with-mcts-2h5k.152104.html).
+
 The following graph shows the Win, Loss, and Draw percentages over 10,000 training games of a standard **Tabular Q-Learning** model and an **MCTS** model, configured with a 20 playout per move sampling rate, playing against each other. (The graph is from the perspective of the Q-Table agent)
 
 ![cumulative_accuracy](Q-Table_vs_MCTS_Cumulative_Accuracy.png)  
