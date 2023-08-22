@@ -8,7 +8,7 @@ python3 Main.py
 
 # Currently Implemented Models
 1. Random
-2. Optimized (Manually programmed to always play best moves)
+2. Optimized (manually programmed to always play best moves)
 2. Tabular Q-Learning
 3. Monte Carlo Tree Search (MCTS)
 
