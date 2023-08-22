@@ -61,7 +61,7 @@ def play(env, players, display=False, Random=True):
 if __name__ == '__main__':
 
     TicENV = Environments.TicTacToeState
-    players = [Agents.QTable(0.99083), Agents.MCTS()]  # Agents.QTable(0.99083)
+    players = [Agents.MCTS(), Agents.Optimal()]  # Agents.QTable(0.99083)
 
     history = []
 
@@ -69,47 +69,22 @@ if __name__ == '__main__':
 
     play(TicENV, [players[1], players[0]], display=False, Random=False)
 
-    for n in range(10000):
+    for n in range(10):
 
-        if (n + 1) % (50) == 0:
+        if (n + 1) % (1) == 0:
             print("Game {}".format(n + 1))
         play(TicENV, players, display=False)
-        history.append(players[0].getPercentages())
+        history.append(players[0].getAverages())
 
     play(TicENV, [players[1], players[0]], display=True, Random=False)
+    play(TicENV, [players[0], players[1]], display=True, Random=False)
 
-    winPercentage = []
-    drawPercentage = []
-    lossPercentage = []
-
-    for n in history:
-        winPercentage.append(n[0])
-        drawPercentage.append(n[1])
-        lossPercentage.append(n[2])
 
     master = plt.figure()
     plt.plot(history)
     plt.xlabel("Number of Games")
     plt.ylabel("Win Percentage")
     plt.savefig("cumulative_accuracy.png")
-
-    win = plt.figure()
-    plt.plot(winPercentage)
-    plt.xlabel("Number of Games")
-    plt.ylabel("Win Percentage")
-    plt.savefig("cumulative_wins.png")
-
-    draw = plt.figure()
-    plt.plot(drawPercentage)
-    plt.xlabel("Number of Games")
-    plt.ylabel("Draw Percentage")
-    plt.savefig("cumulative_draws.png")
-
-    loss = plt.figure()
-    plt.plot(lossPercentage)
-    plt.xlabel("Number of Games")
-    plt.ylabel("Loss Percentage")
-    plt.savefig("cumulative_losses.png")
 
     print("Win Percentage: {}%".format(100 * history[-1][0]))
     print("Loss Percentage: {}%".format(100 * history[-1][2]))

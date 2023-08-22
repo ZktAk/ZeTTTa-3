@@ -1,7 +1,9 @@
 import copy
 import math
+import pickle
 import random
 import numpy as np
+from Environments import Action
 from Environments import TicTacToeState
 
 
@@ -41,12 +43,21 @@ def to2DIndex(index1D, shape=(3,3)):
 	return row, cell
 
 
-class Agent():
+class Agent:
 	def __init__(self):
 		self.wins = 0
 		self.draws = 0
 		self.losses = 0
 		self.numGames = 0
+
+		self.prevWins = 0
+		self.prevDraws = 0
+		self.prevLosses = 0
+
+		self.winHist = [0]
+		self.drawHist = [0]
+		self.lossHist = [0]
+
 
 
 	def giveReward(self, reward):
@@ -60,13 +71,31 @@ class Agent():
 		return [self.wins, self.draws, self.losses]
 
 
-	def getPercentages(self):
+	def getAverages(self):
 		winP = self.wins / self.numGames
 		drawP = self.draws / self.numGames
 		lossP = self.losses / self.numGames
 
 		return [winP, drawP, lossP]
 
+
+class Optimal(Agent):
+	def __init__(self, path="optimal_moves_dictionary.pkl"):
+		super().__init__()
+		with open(path, 'rb') as f:
+			loaded_dict = pickle.load(f)
+		self.dictionary = loaded_dict
+
+	def move(self, initialState):
+		current_state = initialState
+		current_bitboard = current_state.get_bitboard()[2:-1]
+		move = self.dictionary[current_bitboard]
+
+		row = 3 - (int(move[-1]) - 1)
+		column = ["a", "b", "c"].index(move[0].lower()) + 1
+
+		action = current_state.action(row, column)
+		return action
 
 class Random(Agent):
 	def __init__(self):
@@ -152,9 +181,9 @@ class QTable(Agent):
 		score = 0
 
 		if reward == 1:
-			score = 3
-		elif reward == 0:
 			score = 1
+		elif reward == 0:
+			score = 0.5
 		elif reward == -1:
 			score = reward
 
@@ -321,7 +350,7 @@ class MCTS(Agent):
 
 		parent_Node = self.nodes.setdefault(str(state.board), MCTS_Node(state, player=1))
 
-		self.think(parent_Node, 20)
+		self.think(parent_Node, 1000)
 		action = self.pick(parent_Node)
 
 		return action

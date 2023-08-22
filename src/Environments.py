@@ -18,6 +18,8 @@ class Action:
         symbolsDict = {1: 0, -1: 1}
         self.symbol = symbolsDict[player]
 
+        self.ID = "{}:{}:{}".format(self.row, self.column, self.player)
+
 
 class EnvState:
 
@@ -52,6 +54,16 @@ class EnvState:
                     possibleActions.append(Action(self.currentPlayer, row, column))
         return possibleActions
 
+    def getActsForCompare(self):
+        actions = self.getPossibleActions()
+        IDs = []
+        for action in actions:
+            IDs.append(action.ID)
+        return IDs
+
+    def action(self, row, column):
+        return Action(self.currentPlayer, row-1, column-1)
+
     def takeAction(self, action):
         newState = copy.deepcopy(self)
 
@@ -84,17 +96,23 @@ class EnvState:
         for n in range(spaces):
             print("")
 
+        print("-------------")
+
         for r in range(self.rows):
-            output = ""
+            output = "| "
             for c in range(self.columns):
                 for p in range(len(self.board)):
                     if self.board[p][r][c] == 1:
                         output += self.symbols[p] + " | "
 
-            output = output[0:-3]
+
+            #output = output[0:-3]
+            output += str(3-r)
             print(output)
             if r != self.rows - 1:
-                print("---------")
+                print("|-----------| ")
+        print("-------------")
+        print("  A   B   C")
 
 
 class TicTacToeState(EnvState):
@@ -114,8 +132,20 @@ class TicTacToeState(EnvState):
                 bitboard += str(val)
 
         bitboard += "1"
-
         return bitboard
+
+
+    def get_bitboard(self):
+        bitboard = "0b1"
+
+        for piece in self.board:
+            for row in piece:
+                for val in row:
+                    bitboard += str(val)
+
+        bitboard += "1"
+        return bitboard
+
 
     def isWin(self):
 
