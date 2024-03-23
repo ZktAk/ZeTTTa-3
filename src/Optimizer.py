@@ -50,7 +50,7 @@ class OptimalTrainer:
 
     def solve_for_o(self, env):
         current_state = env
-        possible_actions = current_state.getPossibleActions()
+        possible_actions = current_state.get_possible_actions()
         for action in possible_actions:
             new_state = current_state.takeAction(action)
             self.explore_state(new_state)  # recursion
@@ -82,7 +82,7 @@ class OptimalTrainer:
             else:  # If this unique state has not already been encountered, then ask the user to enter the optimal move.
                 current_state.print(2)
 
-                player_to_move = current_state.getPossibleActions()[0].player
+                player_to_move = current_state.get_possible_actions()[0].player
                 player_to_move = "x" if player_to_move == 1 else "o"
 
                 print(str(player_to_move) + " to move.")
@@ -108,7 +108,7 @@ class OptimalTrainer:
                 self.save_to_file()
 
             current_state = current_state.takeAction(action)
-            possible_actions = current_state.getPossibleActions()
+            possible_actions = current_state.get_possible_actions()
 
             for act in possible_actions:
                 new_state = current_state.takeAction(act)

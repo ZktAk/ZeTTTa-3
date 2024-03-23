@@ -1,5 +1,4 @@
 .idea
-MCTS.py
 Old-Main.py
 Test.py
 src/cumulative_accuracy.png

@@ -1,5 +1,4 @@
 import math
-
 import numpy as np
 import random
 import Environments
@@ -13,6 +12,52 @@ def randomizePlayers():
 
     return PlayerX, PlayerO
 
+
+def play1(env, players, display=False, Random=True):
+    current_state = env()  # reset the environment
+
+    if display:
+        current_state.print(2)
+
+    if Random:
+        PlayerX, PlayerO = randomizePlayers()
+    else:
+        PlayerX = 0
+        PlayerO = 1
+
+    currentPlayer = PlayerX
+
+    if display:
+        print("{} plays first.".format(players[currentPlayer].agentType))
+
+    while True:
+
+        action = players[currentPlayer].move(current_state)
+        current_state = current_state.takeAction(action)
+
+        currentPlayer = PlayerO if currentPlayer == PlayerX else PlayerX
+
+        if display:
+            current_state.print(1)
+
+        if current_state.isWin():
+            if display: print("{} Won!".format(current_state.symbols[action.symbol]))
+            players[currentPlayer].give_reward(-1)
+
+            if currentPlayer == 1:
+                players[0].give_reward(1)
+            else:
+                players[1].give_reward(1)
+
+            return
+
+        elif current_state.isDraw():
+            if display: print("Game is a Draw")
+
+            players[0].give_reward(0)
+            players[1].give_reward(0)
+
+            return
 
 def play(env, players, display=False, Random=True):
     current_state = env()  # reset the environment
@@ -28,8 +73,10 @@ def play(env, players, display=False, Random=True):
 
     currentPlayer = PlayerX
 
-    while True:
+    if display:
+        print("{} plays first.".format(players[currentPlayer].agentType))
 
+    while True:
         action = players[currentPlayer].move(current_state)
         current_state = current_state.takeAction(action)
 
@@ -40,45 +87,47 @@ def play(env, players, display=False, Random=True):
 
         if current_state.isWin():
             if display: print("{} Won!".format(current_state.symbols[action.symbol]))
-            players[currentPlayer].giveReward(-1)
+            players[currentPlayer].give_reward(-1)
 
             if currentPlayer == 1:
-                players[0].giveReward(1)
+                players[0].give_reward(1)
             else:
-                players[1].giveReward(1)
+                players[1].give_reward(1)
 
             return
 
         elif current_state.isDraw():
             if display: print("Game is a Draw")
 
-            players[0].giveReward(0)
-            players[1].giveReward(0)
+            players[0].give_reward(0)
+            players[1].give_reward(0)
 
             return
 
 
 if __name__ == '__main__':
 
-    TicENV = Environments.TicTacToeState
-    players = [Agents.MCTS(), Agents.Optimal()]  # Agents.QTable(0.99083)
+    random.seed(6637847918576438608)
 
+    TicENV = Environments.TicTacToeState
+    players = [Agents.QTable(0.1, 1000), Agents.Optimal()] #Agents.QTable(0.1, 1000)
     history = []
 
     print("Started...")
 
     play(TicENV, [players[1], players[0]], display=False, Random=False)
 
-    for n in range(10):
+    for n in range(10000):
 
         if (n + 1) % (1) == 0:
             print("Game {}".format(n + 1))
         play(TicENV, players, display=False)
         history.append(players[0].getAverages())
 
-    play(TicENV, [players[1], players[0]], display=True, Random=False)
-    play(TicENV, [players[0], players[1]], display=True, Random=False)
+    #play(TicENV, [players[1], players[0]], display=True, Random=False)
+    #play(TicENV, [players[0], players[1]], display=True, Random=False)
 
+    #return 100 * history[-1][1]
 
     master = plt.figure()
     plt.plot(history)
@@ -86,9 +135,10 @@ if __name__ == '__main__':
     plt.ylabel("Win Percentage")
     plt.savefig("cumulative_accuracy.png")
 
-    print("Win Percentage: {}%".format(100 * history[-1][0]))
-    print("Loss Percentage: {}%".format(100 * history[-1][2]))
-    print("Draw Percentage: {}%".format(100 * history[-1][1]))
+    print("{} Win Percentage: {}%".format(players[0].agentType, 100 * history[-1][0]))
+    print("{} Loss Percentage: {}%".format(players[0].agentType, 100 * history[-1][2]))
+    print("{} Draw Percentage: {}%".format(players[0].agentType, 100 * history[-1][1]))
+
 
     #print("unique game scenarios: {} | {}".format(len(players[0].masterNodes),len(players[1].nodes)))
 

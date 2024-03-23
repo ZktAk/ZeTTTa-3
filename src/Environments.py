@@ -44,7 +44,7 @@ class EnvState:
     def getCurrentPlayer(self):
         return self.currentPlayer
 
-    def getPossibleActions(self):
+    def get_possible_actions(self):
         possibleActions = []
         for row in range(len(self.board[-1])):
             for column in range(len(self.board[-1][row])):
@@ -55,7 +55,7 @@ class EnvState:
         return possibleActions
 
     def getActsForCompare(self):
-        actions = self.getPossibleActions()
+        actions = self.get_possible_actions()
         IDs = []
         for action in actions:
             IDs.append(action.ID)
@@ -89,6 +89,8 @@ class EnvState:
         # after the last action was taken, the current player was switched.
         # self.currentPlayer * -1 switches to the previous player, the one that just moved.
         # Thus, we can use the value stored in self.currentPlayer as the reward.
+        elif self.isTerminal():
+            return 0
         return False
 
     def print(self, spaces):

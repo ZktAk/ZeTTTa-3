@@ -8,353 +8,244 @@ from Environments import TicTacToeState
 
 
 def containsElement(arr, val):
-	for n in arr:
-		if n == val: return True
-	return False
-
+    """Check if a value is present in an array."""
+    for n in arr:
+        if n == val: return True
+    return False
 
 def arrEqualsArr(arr1, arr2):
-
-	#print("arr1: {}".format(arr1.flatten()))
-	#print("arr2: {}".format(arr2.flatten()))
-
-	elementsThatMatch = arr1.flatten() == arr2.flatten()
-
-	for val in elementsThatMatch:
-		if val == False:
-			#print("False\n")
-			return False
-	#print("True\n")
-	return True
+    """Check if two arrays are equal."""
+    elementsThatMatch = arr1.flatten() == arr2.flatten()
+    for val in elementsThatMatch:
+        if not val:
+            return False
+    return True
 
 
 def containsArray(superArr, subArr):
+    """Check if an array is present in a list of arrays."""
+    for arr in superArr:
+        if arrEqualsArr(arr, subArr): return True
+    return False
 
-	for arr in superArr:
-		if arrEqualsArr(arr, subArr): return True
-	return False
 
-
-def to2DIndex(index1D, shape=(3,3)):
-
-	row = math.floor(index1D / shape[0])
-	cell = index1D - (row * shape[1])
-
-	return row, cell
-
+def to2DIndex(index1D, shape=(3, 3)):
+    """Convert a 1D index to a 2D index."""
+    row = math.floor(index1D / shape[0])
+    cell = index1D - (row * shape[1])
+    return row, cell
 
 class Agent:
-	def __init__(self):
-		self.wins = 0
-		self.draws = 0
-		self.losses = 0
-		self.numGames = 0
+    def __init__(self):
+        self.wins = 0
+        self.draws = 0
+        self.losses = 0
+        self.numGames = 0
 
-		self.prevWins = 0
-		self.prevDraws = 0
-		self.prevLosses = 0
+        self.prevWins = 0
+        self.prevDraws = 0
+        self.prevLosses = 0
 
-		self.winHist = [0]
-		self.drawHist = [0]
-		self.lossHist = [0]
+        self.winHist = [0]
+        self.drawHist = [0]
+        self.lossHist = [0]
 
+    def give_reward(self, reward):
+        self.numGames += 1
+        if reward == 1:
+            self.wins += 1
+        elif reward == 0:
+            self.draws += 1
+        elif reward == -1:
+            self.losses += 1
 
+    def get(self):
+        return [self.wins, self.draws, self.losses]
 
-	def giveReward(self, reward):
-		self.numGames += 1
-		if reward == 1:	self.wins += 1
-		elif reward == 0: self.draws += 1
-		elif reward == -1: self.losses += 1
+    def getAverages(self):
+        winP = self.wins / self.numGames
+        drawP = self.draws / self.numGames
+        lossP = self.losses / self.numGames
 
+        return [winP, drawP, lossP]
 
-	def get(self):
-		return [self.wins, self.draws, self.losses]
-
-
-	def getAverages(self):
-		winP = self.wins / self.numGames
-		drawP = self.draws / self.numGames
-		lossP = self.losses / self.numGames
-
-		return [winP, drawP, lossP]
-
-
+    def backprop(self):
+        pass
 class Optimal(Agent):
-	def __init__(self, path="optimal_moves_dictionary.pkl"):
-		super().__init__()
-		with open(path, 'rb') as f:
-			loaded_dict = pickle.load(f)
-		self.dictionary = loaded_dict
+    def __init__(self, path="optimal_moves_dictionary.pkl"):
+        super().__init__()
+        self.agentType = "Optimal"
+        with open(path, 'rb') as f:
+            loaded_dict = pickle.load(f)
+        self.dictionary = loaded_dict
 
-	def move(self, initialState):
-		current_state = initialState
-		current_bitboard = current_state.get_bitboard()[2:-1]
-		move = self.dictionary[current_bitboard]
+    def move(self, initialState):
+        current_state = initialState
+        current_bitboard = current_state.get_bitboard()[2:-1]
+        move = self.dictionary[current_bitboard]
 
-		row = 3 - (int(move[-1]) - 1)
-		column = ["a", "b", "c"].index(move[0].lower()) + 1
+        row = 3 - (int(move[-1]) - 1)
+        column = ["a", "b", "c"].index(move[0].lower()) + 1
 
-		action = current_state.action(row, column)
-		return action
+        action = current_state.action(row, column)
+        return action
+
 
 class Random(Agent):
-	def __init__(self):
-		super().__init__()
+    def __init__(self):
+        super().__init__()
+        self.agentType = "Random"
 
-	def move(self, initialState):
-		possibleActions = initialState.getPossibleActions()
-		if len(possibleActions) == 0:
-			return None
-		return random.choice(possibleActions)
+    def move(self, initialState):
+        possibleActions = initialState.get_possible_actions()
+        if len(possibleActions) == 0:
+            return None
+        return random.choice(possibleActions)
 
 
-class qTable_Node():
-	def __init__(self, initialState, identifier):
-		"""data: A Dictionary that stores all the data related to the node"""
-
-		self.state = initialState
-		self.id = identifier
-
-		self.PossibleActions = self.state.getPossibleActions()
-
-		self.actions = {}
-
-		for PossibleAction in self.PossibleActions:
-			self.actions[PossibleAction] = 0
+class qTable_Node:
+    def __init__(self, initial_state, identifier):
+        """Initializes a Q-table node with initial state and identifier."""
+        self.state = initial_state
+        self.id = identifier
+        self.PossibleActions = self.state.get_possible_actions()
+        self.actions = {action: 0 for action in self.PossibleActions}
 
 
 def locate(identifier, arr):
-	"""Returns the index of the Node with the provided identifier in the provided array if found, else returns False."""
-
-	for n in range(len(arr)):
-		if arrEqualsArr(arr[n].id, identifier):  # if arr[n].id == identifier:
-			return n
-	return False
-
+    """Locate a node with the provided identifier in the array."""
+    for n, node in enumerate(arr):
+        if arrEqualsArr(node.id, identifier):
+            return n
+    return False
 
 class QTable(Agent):
 
-	def __init__(self, gamma):
-		super().__init__()
+    def __init__(self, convergence, num_games):
+        """Initializes a Q-table agent with convergence and number of games.
 
-		self.p = 1
-		self.gamma = gamma
+        Qtable(self, C, N)
 
-		self.masterNodes = []
-		self.gameNodes = []
-		self.gameActions = []
+        C	--	convergence
 
-	def move(self, state):
+        N	--	number of games
 
-		action = None
-		actions = []
+        C^(1/N)	--	yields exploration gamma"""
 
-		currentState = qTable_Node(state, identifier=np.copy(state.board))
+        super().__init__()
+        self.agentType = "Q-Table"
+        self.p = 1
+        self.gamma = convergence ** (1 / float(num_games))
+        self.master_nodes = []
+        self.game_nodes = []
+        self.game_actions = []
 
-		index = locate(currentState.id, self.masterNodes)
-		if index == False:
-			self.masterNodes.append(currentState)
-		else:
-			currentState = self.masterNodes[index]
+    def move(self, state):
+        """Selects an action based on the state."""
+        current_state = qTable_Node(state, identifier=np.copy(state.board))
+        index = locate(current_state.id, self.master_nodes)
+        if index is False:
+            self.master_nodes.append(current_state)
+        else:
+            current_state = self.master_nodes[index]
+        self.game_nodes.append(current_state)
+        if random.random() <= self.p:
+            actions = list(current_state.actions.keys())
+        else:
+            best_val = float("-inf")
+            actions = []
+            for action, value in current_state.actions.items():
+                if value == best_val:
+                    actions.append(action)
+                elif value > best_val:
+                    best_val = value
+                    actions = [action]
+        action = random.choice(actions)
+        self.game_actions.append(action)
+        return action
 
-		self.gameNodes.append(currentState)
-
-		if random.random() <= self.p:
-			for act, val in currentState.actions.items():
-				actions.append(act)
-		else:
-			best_val = float("-inf")
-			for act, val in currentState.actions.items():
-				if val == best_val:
-					actions.append(act)
-				elif val > best_val:
-					best_val = val
-					actions = [act]
-
-		action = random.choice(actions)
-		self.gameActions.append(action)
-		return action
-
-	def giveReward(self, reward):
-		super().giveReward(reward)
-
-		score = 0
-
-		if reward == 1:
-			score = 1
-		elif reward == 0:
-			score = 0.5
-		elif reward == -1:
-			score = reward
-
-		for n in range(len(self.gameNodes)):
-			actionTaken = self.gameActions[n]
-			self.gameNodes[n].actions[actionTaken] += score
-
-		self.gameNodes = []
-		self.gameActions = []
-		self.p *= self.gamma
+    def give_reward(self, reward):
+        """Assigns rewards to actions taken during the game."""
+        super().give_reward(reward)
+        score = 0.5 if reward == 0 else reward
+        for game_node, action_taken in zip(self.game_nodes, self.game_actions):
+            game_node.actions[action_taken] += score
+        self.game_nodes = []
+        self.game_actions = []
+        self.p *= self.gamma
 
 
-class MCTS_Node():
+class MCTSNode():
 
-	def __init__(self, state, parent=None, player=None, action=None):
+    def __init__(self, state, parent=None, action=None):
+        self.state = copy.deepcopy(state)
+        self.action = action
+        self.parent = parent
+        self.children = []
+        self.visits = 0
+        self.wins = 0
 
-		self.state = copy.deepcopy(state)
+    def expand(self):
+        possible_actions = self.state.get_possible_actions()
+        for action in possible_actions:
+            new_state = self.state.takeAction(action)
+            new_node = MCTSNode(new_state, self, action)
+            self.children.append(new_node)
 
-		self.parent = parent
-		self.visits = 0
-		self.winsOrDraws = 0
-		self.action = action
+    def isFullyExpanded(self):
+        possible_actions = self.state.get_possible_actions()
+        return len(self.children) == len(possible_actions)
 
-		if player is not None:
-			self.id = player
-		else:
-			self.id = self.parent.id * -1
+    def UCB1(self, exploration_constant=1.41):
+        if self.visits == 0:
+            return float('inf')
+        exploitation = self.wins / self.visits
+        exploration = exploration_constant * math.sqrt(math.log(self.parent.visits) / self.visits)
+        return exploitation + exploration
 
-		self.children = None
+    def selectChild(self):
+        selected_child = max(self.children, key=lambda child: child.UCB1())
+        return selected_child
 
-	def init_children(self):
-
-		if self.children is not None: return
-
-		actions = self.state.getPossibleActions()
-
-		self.children = []
-
-		for action in actions:
-			child_state = copy.deepcopy(self.state).takeAction(action)
-			self.children.append(MCTS_Node(child_state, self, action=action))
-
-
-	def value(self):
-		if self.visits == 0: return 0
-
-		score = self.winsOrDraws
-		success_rate = score / self.visits
-		return success_rate
-
-
-	def UCT(self, c=math.sqrt(2)):
-
-		if self.visits == 0:
-			return math.inf
-
-		success_rate = self.value()
-		exploration_term = c * math.sqrt(math.log(self.parent.visits) / self.visits)
-		UCT = success_rate + exploration_term
-		return UCT
-
-	def exploration_rate(self, c=math.sqrt(2)):
-		if self.visits == 0: return math.inf
-		exploration_term = c * math.sqrt(math.log(self.parent.visits) / self.visits)
-		return exploration_term
-
-	def success_rate(self):
-		success_rate = self.value()
-		return success_rate
-
-
+    def backpropagate(self, result):
+        self.visits += 1
+        self.wins += result
+        if self.parent:
+            self.parent.backpropagate(result)
 class MCTS(Agent):
 
-	def __init__(self):
-		super().__init__()
-		self.nodes = {}
+    def __init__(self, num_simulations=50):
+        super().__init__()
+        self.agentType = "MCTS"
+        self.num_simulations = num_simulations
 
-	def select(self, node, c=math.sqrt(2)):
+    def move(self, state):
+        root = MCTSNode(state, action=None)
+        for _ in range(self.num_simulations):
+            node = self.select_node(root)
+            result = self.simulate(node)
+            node.backpropagate(result)
+        best_child = max(root.children, key=lambda child: child.visits)
+        return best_child.action
 
-		# this method simulates calculate_value() and calculate_values() and choose_move()
-		node.init_children()
+    def select_node(self, root):
+        node = root
+        while not node.state.isTerminal():
+            if not node.isFullyExpanded():
+                node.expand()
+                return node.children[0]
+            else:
+                node = node.selectChild()
+        return node
 
-		best_val = float("-inf")
-		nodes = []
-
-		for child in node.children:  # calculate_values()
-			value = child.UCT(c)  # calculate_value()
-			if value > best_val:
-				nodes = [child]
-				best_val = value
-			if value == best_val:
-				nodes.append(child)
-
-		best_node = random.choice(nodes)  # choose_move()
-
-		return best_node
-
-	def expand(self, node):
-		node.init_children()
-
-		if len(node.children) == 0:
-			return node
-
-		# new_node = random.choice(node.children)
-		new_node = self.select(node)
-		return new_node
-
-
-	def perform_playout(self, node):
-
-		current_node = node
-
-		#print(current_node.state.isTerminal())
-
-		while not current_node.state.isTerminal():
-			current_node = self.select(current_node)
-		return current_node
-
-	def backprop(self, winner_id, leaf_node, initial_node):
-		node = leaf_node
-		while node is not None:
-			node.visits += 1
-			if node.id == winner_id:
-				node.winsOrDraws += 1
-			if node is initial_node:
-				break
-
-			node = node.parent
-
-
-	def think(self, initial_node, iterations=100):
-
-		for n in range(iterations):
-			parent_Node = initial_node
-
-			winning_node = self.perform_playout(parent_Node)
-
-			winning_player = winning_node.id
-
-			self.backprop(winning_player, winning_node, parent_Node)
-
-
-	def pick(self, node):
-
-		node.init_children()
-
-		best_val = float("-inf")
-		nodes = []
-
-		for child in node.children:
-			value = child.visits
-			if value > best_val:
-				nodes = [child]
-				best_val = value
-			if value == best_val:
-				nodes.append(child)
-
-		choice = random.choice(nodes)
-		action = choice.action
-
-		return action
-
-	def move(self, state):
-
-		parent_Node = self.nodes.setdefault(str(state.board), MCTS_Node(state, player=1))
-
-		self.think(parent_Node, 1000)
-		action = self.pick(parent_Node)
-
-		return action
-
-
-
-
+    def simulate(self, node):
+        current_state = node.state
+        player = 1
+        while not current_state.isTerminal():
+            player *= -1
+            possible_actions = current_state.get_possible_actions()
+            action = random.choice(possible_actions)
+            current_state = current_state.takeAction(action)
+        player *= -1
+        # if (player != current_state.getReward()): print("{} != {}".format(player, current_state.getReward()))
+        return current_state.getReward() if current_state.getReward() != 0 else 0.9
