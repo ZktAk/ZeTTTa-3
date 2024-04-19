@@ -7,7 +7,7 @@ python3 Main.py
 ```  
   
 # Currently Implemented Models  
-1. [Monte Carlo Tree Search (MCTS)](https://github.com/ZktAk/Tic-Tac-Toe_AI/tree/main?tab=readme-ov-file#mcts-vs-q-table)  
+1. [Monte Carlo Tree Search (MCTS)](###mcts-vs-q-table)  
 2. [Tabular Q-Learning](https://github.com/ZktAk/Tic-Tac-Toe_AI/tree/main?tab=readme-ov-file#q-table-vs-optimal)
 3. [Random](https://github.com/ZktAk/Tic-Tac-Toe_AI/tree/main?tab=readme-ov-file#random-vs-optimal)  
 4. [Optimized (manually programmed to always play best moves)](https://xkcd.com/832/) 
