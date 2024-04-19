@@ -7,9 +7,9 @@ python3 Main.py
 ```  
   
 # Currently Implemented Models  
-1. [Monte Carlo Tree Search (MCTS)](https://github.com/ZktAk/Tic-Tac-Toe_AI/tree/main?tab=readme-ov-file#mcts-vs-optimal)  
-2. [Tabular Q-Learning](https://github.com/ZktAk/Tic-Tac-Toe_AI/tree/main?tab=readme-ov-file#q-table-vs-optimal)
-3. [Random](https://github.com/ZktAk/Tic-Tac-Toe_AI/tree/main?tab=readme-ov-file#random-vs-optimal)  
+1. [Monte Carlo Tree Search (MCTS)](#mcts-vs-optimal)  
+2. [Tabular Q-Learning](#q-table-vs-optimal)
+3. [Random](#random-vs-optimal)  
 4. [Optimized (manually programmed to always play best moves)](https://xkcd.com/832/) 
   
 # Planned Models   
@@ -30,7 +30,7 @@ MCTS Win Percentage: 0.00%
 MCTS Loss Percentage: 52.48%     
 MCTS Draw Percentage: 47.53%  
 ***  
-**Q-Table vs Optimal**  
+### Q-Table vs Optimal  
   
 The following graph shows the Win, Loss, and Draw percentages over 10,000 training games of a standard **Tabular Q-Learning** model playing against an **Optimal Agent**.  
   
@@ -39,7 +39,7 @@ Q-Table Win Percentage: 0.00%
 Q-Table Loss Percentage: 6.40%       
 Q-Table Draw Percentage: 93.60%  
 ***  
-**Random vs Optimal**  
+### Random vs Optimal  
   
 The following graph shows the Win, Loss, and Draw percentages over 10,000 training games of a **Random** agent playing against an **Optimal Agent**.  
   
