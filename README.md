@@ -19,7 +19,7 @@ python3 Main.py
 
 # Test Results
 
-**MCTS vs Q-Table**
+### MCTS vs Q-Table
 
 "Monte Carlo is a heuristic. With a heuristic, we are not guaranteed precisely the correct or the best answer, but we can get an approximation that can often be good enough" [nestedsoftware](https://nestedsoftware.com/2019/08/07/tic-tac-toe-with-mcts-2h5k.152104.html).
 
@@ -30,7 +30,7 @@ MCTS Win Percentage: 0.00%
 MCTS Loss Percentage: 52.48%   
 MCTS Draw Percentage: 47.53%
 ***
-**Q-Table vs Optimal**
+### Q-Table vs Optimal
 
 The following graph shows the Win, Loss, and Draw percentages over 10,000 training games of a standard **Tabular Q-Learning** model playing against an **Optimal Agent**.
 
@@ -39,7 +39,7 @@ Q-Table Win Percentage: 0.00%
 Q-Table Loss Percentage: 6.40%     
 Q-Table Draw Percentage: 93.60%
 ***
-**Random vs Optimal**
+### Random vs Optimal
 
 The following graph shows the Win, Loss, and Draw percentages over 10,000 training games of a **Random** agent playing against an **Optimal Agent**.
 
