@@ -44,6 +44,6 @@ Q-Table Draw Percentage: 93.60%
 The following graph shows the Win, Loss, and Draw percentages over 10,000 training games of a **Random** agent playing against an **Optimal Agent**.  
   
 ![cumulative_accuracy](Random_vs_Optimal-Cumulative_Accuracy.png)    
-Q-Table Win Percentage: 0.00%      
-Q-Table Loss Percentage: 91.11%       
-Q-Table Draw Percentage: 8.89%
+Random Win Percentage: 0.00%      
+Random Loss Percentage: 91.11%       
+Random Draw Percentage: 8.89%
