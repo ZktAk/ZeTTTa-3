@@ -26,6 +26,62 @@ num = 120  # amount to delete
 index = 0  # index to delete
 
 if False:
+    for key in states:
+        value = loaded_dict[key]
+
+        row = value[1]
+        column = value[0]
+
+        new_value = (3 * (int(row) - 1)) + ["c", "b", "a"].index(column)
+
+        Bin = 0b1 << new_value
+
+        loaded_dict[key] = Bin
+
+    with open(filepath, 'wb') as f:
+        pickle.dump(loaded_dict, f)
+
+    states = list(loaded_dict.keys())
+    moves = list(loaded_dict.values())
+
+    print("Unique States ({}): {}".format(len(states), states))
+    print("Optimal Moves ({}): {}".format(len(moves), moves))
+
+
+
+if False:
+    for key in states:
+
+        new_key = [key[1:10], key[10:19]]
+
+        x = 0b000000000
+        for n in range(9):
+            if new_key[0][n] == "1":
+                x |= 0b1 << 8 - n
+
+        o = 0b000000000
+        for n in range(9):
+            if new_key[1][n] == "1":
+                o |= 0b1 << 8 - n
+
+        new_key = x << 9 | o
+
+        # print("{0:b}".format(new_key))
+
+        loaded_dict[new_key] = loaded_dict.pop(key)
+
+    with open(filepath, 'wb') as f:
+        pickle.dump(loaded_dict, f)
+
+    states = list(loaded_dict.keys())
+    moves = list(loaded_dict.values())
+
+    print("Unique States ({}): {}".format(len(states), states))
+    print("Optimal Moves ({}): {}".format(len(moves), moves))
+
+
+
+if False:
 
     # Delete
     for n in range(num):

@@ -9,7 +9,7 @@
 # which was originally found linked in this StackExchange post:
 # https://puzzling.stackexchange.com/a/47
 
-import Environments
+import Environment
 import pickle
 
 
