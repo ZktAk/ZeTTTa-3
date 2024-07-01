@@ -35,7 +35,7 @@ MCTS Loss Percentage: 3.0%
 The following graph shows the Win, Draw, and Loss percentages over 10,000 training games of a standard **Tabular Q-Learning** model playing against an **Optimal Agent**.  
   
 ![cumulative_accuracy](Q-Table_vs_Optimal-Cumulative_Accuracy.png)    
-Q-Table Win Percentage: 0.00%  
+Q-Table Win Percentage: 0.00%      
 Q-Table Draw Percentage: 93.60%      
 Q-Table Loss Percentage: 6.40% 
 ***  
