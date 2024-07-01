@@ -26,7 +26,7 @@ python3 Main.py
 The following graph shows the Win, Draw, and Loss percentages over 100 training games of a **MCTS** model, configured with a 5000 playout per move sampling rate, playing against an **Optimal Agent**. After much testing, 5000 playouts per move seemed to be close to the ideal configuration for maximizing model performance.  
   
 ![cumulative_accuracy](MCTS_vs_Optimal-Cumulative_Accuracy.png)    
-MCTS Win Percentage: 0.0%
+MCTS Win Percentage: 0.0%      
 MCTS Draw Percentage: 97.0%      
 MCTS Loss Percentage: 3.0% 
 ***  
