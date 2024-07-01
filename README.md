@@ -27,7 +27,7 @@ The following graph shows the Win, Draw, and Loss percentages over 100 training 
   
 ![cumulative_accuracy](MCTS_vs_Optimal-Cumulative_Accuracy.png)    
 MCTS Win Percentage: 0.0%
-MCTS Draw Percentage: 97.0%
+MCTS Draw Percentage: 97.0%      
 MCTS Loss Percentage: 3.0% 
 ***  
 ### Q-Table vs Optimal  
@@ -36,7 +36,7 @@ The following graph shows the Win, Draw, and Loss percentages over 10,000 traini
   
 ![cumulative_accuracy](Q-Table_vs_Optimal-Cumulative_Accuracy.png)    
 Q-Table Win Percentage: 0.00%  
-Q-Table Draw Percentage: 93.60% 
+Q-Table Draw Percentage: 93.60%      
 Q-Table Loss Percentage: 6.40% 
 ***  
 ### Random vs Optimal  
@@ -45,5 +45,5 @@ The following graph shows the Win, Draw, and Loss percentages over 10,000 traini
   
 ![cumulative_accuracy](Random_vs_Optimal-Cumulative_Accuracy.png)    
 Q-Table Win Percentage: 0.00%      
-Q-Table Draw Percentage: 8.89%
+Q-Table Draw Percentage: 8.89%      
 Q-Table Loss Percentage: 91.11%
