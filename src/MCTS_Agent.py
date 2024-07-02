@@ -49,7 +49,7 @@ class MCTS():
 
 		for n in range(self.num_simulations):
 			node = self.select(env, root_node, copy.deepcopy(piece))
-			rewards = self.simulate(node)
+			rewards = self.rollout(node)
 			self.backpropagate(node, rewards)
 		best_child = max(root_node.children, key=lambda child: child.visits)
 		return best_child.move
@@ -83,7 +83,7 @@ class MCTS():
 		else:
 			return node.parent
 
-	def simulate(self, start):
+	def rollout(self, start):
 		p1 = Agents.Agent("Randy", 0)
 		p2 = Agents.Agent("Randy", 1)
 		rewards = playout(copy.deepcopy(start.env), p1, p2, 0b0)
