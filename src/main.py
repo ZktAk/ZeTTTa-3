@@ -80,7 +80,7 @@ if __name__ == '__main__':
 
 	ENV = Tic_Tac_Toe_State()
 	q_table_model_params = [0.1, 5000]
-	p1 = Agents.Agent("HeavyTree", 0, 5000)
+	p1 = Agents.Agent("HeavyTree", 0, 5000)  # Agent names are listed and explained in Agents.py
 	p2 = Agents.Agent("Optimus", 1, 100)
 
 	players = [p1, p2]
@@ -93,12 +93,12 @@ if __name__ == '__main__':
 	losses = 0
 
 	num_games = 100
-	percent_show = 100  # percentage of games to print status output
+	percent_show = 100  # A status report will be printed every N%-of-num_games games. For instance, when num_games = 1000 and percent_show = 5, a status report will be printed every 50 games
 	player_to_track = 0
 
 	for n in range(num_games):
 
-		if (n + 1) % ((num_games * 100/percent_show) / num_games) == 0:
+		if (n + 1) % (num_games * (percent_show/100)) == 0:
 			print("Game {}".format(n + 1))
 
 		win, draw, lose = play(ENV, p1, p2, 0, player_to_track, False)

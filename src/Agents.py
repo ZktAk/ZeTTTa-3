@@ -9,8 +9,7 @@ class Agent:
 	def __init__(self, model, piece, extra_params=None):
 		self.piece = piece
 
-		agents = {"Randy": Random, "Optimus": Optimal, "Quill": QTable,
-		          "HeavyTree": MCTS_Agent.MCTS}  # HeavyTree, Neura, ScoutNet
+		agents = {"Randy": Random, "Optimus": Optimal, "Quill": QTable, "HeavyTree": MCTS_Agent.MCTS}  # HeavyTree, Neura, ScoutNet
 		"""
 		Hidden meaning behind name choices (yes, this was completely unnecessary and took way too long):
 
