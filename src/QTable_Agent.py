@@ -1,11 +1,10 @@
 import random
+from Agents import Agent
 
 
-class QTable:
-	def __init__(self, extra_params):
-
-		convergence = extra_params[0]
-		num_games = extra_params[1]
+class QTable(Agent):
+	def __init__(self, convergence, num_games):
+		super().__init__()
 
 		"""
 		Initializes a Q-table agent with convergence and number of games.
@@ -27,18 +26,19 @@ class QTable:
 		self.game_memory = []
 
 
-	def move(self, state, piece):
+	def move(self, observation, env=None):
 
-		state_key = state.x_bitboard << 9 | state.y_bitboard
+		x_bitboard, y_bitboard, empty_bitboard = observation[0]
+
+		state_key = x_bitboard << 9 | y_bitboard
 
 		try:
 			moves = self.move_dictionary[state_key]
 		except KeyError:
 			moves = {}
-			empty_bitboard = state.getLegalMoves("bitboard")
 			for n in range(9):
 				if (0b1 << n) & empty_bitboard > 0:
-					moves[0.1*n] = 0b1 << n
+					moves[0.1*n] = n
 			self.move_dictionary[state_key] = moves
 
 		if random.random() <= self.p:
