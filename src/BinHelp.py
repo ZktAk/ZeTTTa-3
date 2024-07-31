@@ -27,3 +27,17 @@ def get_legal_indices(bitboards):
 		if _ & test == test:
 			arr.append(n)
 	return arr
+
+
+def get_bit(number, bit):
+	return (number >> bit) & 1
+
+
+def bin_to_array(bin, length):
+	array = []
+
+	for n in range(length):
+		bit = get_bit(bin, n)
+		array.append(bit)
+
+	return array

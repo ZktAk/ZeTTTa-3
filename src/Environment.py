@@ -1,8 +1,4 @@
-from BinHelp import pretty_bin
-
-
-def get_bit(number, bit):
-	return (number >> bit) & 1
+from BinHelp import pretty_bin, get_bit
 
 
 class Tic_Tac_Toe_State:

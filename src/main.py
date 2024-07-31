@@ -4,6 +4,7 @@ import Random_Agent
 import Optimal_Agent
 import QTable_Agent
 import MCTS_Agent
+import NeuralNetwork_Agent
 
 import matplotlib.pyplot as plt
 import random
@@ -82,16 +83,17 @@ if __name__ == '__main__':
 	Optimus = Optimal_Agent.Optimal()
 	Quill = QTable_Agent.QTable(0.1, 100)
 	Monte = MCTS_Agent.MCTS(1000)
+	Neura = NeuralNetwork_Agent.RLAgent(input_size=18, num_hidden=4, hidden_size=64, output_size=9, batch_size=64)
 
 	# select agents types to player
-	p1 = Monte
+	p1 = Neura
 	p2 = Optimus
 
 	players = [p1, p2]
 	player_to_track = 0
 
 	# Randomize which agent goes first each game?
-	Randomize = True
+	Randomize = False
 
 	names = [players[0].agentType, players[1].agentType]
 
@@ -102,8 +104,8 @@ if __name__ == '__main__':
 	draws = 0
 	losses = 0
 
-	num_games = 100
-	interval = 1
+	num_games = 10000
+	interval = 100
 
 	UID = players[player_to_track].UID
 
