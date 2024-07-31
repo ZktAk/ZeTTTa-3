@@ -42,14 +42,15 @@ class MCTS(Agent):
 		self.rollout_agent_2 = Random()
 
 
-	def move(self, observation, environment=None):
+	def move(self, observation):
 
+		environment = copy.deepcopy(observation[2])
 		render_mode = environment.render_mode
 		environment.render_mode = False
 
 		x_bitboard, y_bitboard, _ = observation[0]
-		root_piece = observation[1]
 
+		root_piece = observation[1]
 		root_key = x_bitboard << 9 | y_bitboard
 		root_node = Node(root_key, environment)
 

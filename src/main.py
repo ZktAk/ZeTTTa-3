@@ -29,12 +29,12 @@ def playout(env, players, display=False):
 
 
 		prev_obs = observation
-		state, turn = observation
+		state, turn, _ = observation
 		player = players[turn]
 
 		if display: print("{} ({}) to move\n".format(["x","o"][turn], player.agentType))
 
-		action = player.move(observation, env)
+		action = player.move(observation)
 
 		observation, rewards, done = env.step(action)
 

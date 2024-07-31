@@ -43,7 +43,7 @@ class Tic_Tac_Toe_State:
 
 		self.render()
 
-		self.observation = [self.bitboards, self.current_move]
+		self.observation = [self.bitboards, self.current_move, self]
 		return self.observation
 
 
@@ -73,7 +73,7 @@ class Tic_Tac_Toe_State:
 		self.bitboards[2] = ~(self.bitboards[0] | self.bitboards[1]) & 0b111111111
 		self.current_move = 1 - self.current_move
 
-		self.observation = [self.bitboards, self.current_move]
+		self.observation = [self.bitboards, self.current_move, self]
 		self.done = self.check_terminal()
 
 		self.render()

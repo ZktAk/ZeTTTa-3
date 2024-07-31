@@ -9,7 +9,7 @@ class Random(Agent):
 		super().__init__()
 		self.agentType = "Random"
 
-	def move(self, observation, env=None):
+	def move(self, observation):
 		legal_squares = get_legal_indices(observation[0])
 		return random.choice(legal_squares)
 

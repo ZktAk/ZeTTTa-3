@@ -26,7 +26,7 @@ class QTable(Agent):
 		self.game_memory = []
 
 
-	def move(self, observation, env=None):
+	def move(self, observation):
 
 		x_bitboard, y_bitboard, empty_bitboard = observation[0]
 

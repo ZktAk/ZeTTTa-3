@@ -3,7 +3,7 @@ An implementation of a tic-tac-toe solver using various AI and Machine Learning 
   
 ### Usage  
 ```  
-python3 Main.py  
+python3 main.py  
 ```  
   
 # Currently Implemented Models  

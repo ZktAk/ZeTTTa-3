@@ -10,7 +10,7 @@ class Optimal(Agent):
             loaded_dict = pickle.load(f)
         self.dictionary = loaded_dict
 
-    def move(self, observation, env=None):
+    def move(self, observation):
         x_bitboard, y_bitboard, _ = observation[0]
 
         key = x_bitboard << 9 | y_bitboard
