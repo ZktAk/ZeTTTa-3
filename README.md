@@ -24,9 +24,9 @@ python3 main.py
  
 The following graph shows the Win, Draw, and Loss percentages over 10,000 non-randomized training games of a **Neural Network** (NN) model playing against an **Optimal Agent**. In this case, "non-randomized" means that the neural network (NN) always plays as X. For some reason, the NN does not currently learn when playing as O. This issue is actively being investigated.
 ![cumulative_accuracy](graphs/NeuralNetwork_vs_Optimal-Cumulative_Accuracy.png)    
-MCTS Win Percentage: 0.0%      
-MCTS Draw Percentage: 92.25%      
-MCTS Loss Percentage: 7.75% 
+NN Win Percentage: 0.0%      
+NN Draw Percentage: 92.25%      
+NN Loss Percentage: 7.75% 
 ***    
 ### MCTS vs Optimal
   
@@ -52,6 +52,6 @@ Q-Table Loss Percentage: 3.09%
 The following graph shows the Win, Draw, and Loss percentages over 10,000 randomized training games of a **Random** agent playing against an **Optimal Agent**.  
   
 ![cumulative_accuracy](graphs/Random_vs_Optimal-Cumulative_Accuracy.png)    
-Q-Table Win Percentage: 0.00%      
-Q-Table Draw Percentage: 8.61%      
-Q-Table Loss Percentage: 91.39%
+Random Win Percentage: 0.00%      
+Random Draw Percentage: 8.61%      
+Random Loss Percentage: 91.39%
