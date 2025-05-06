@@ -1,3 +1,7 @@
+import copy
+
+import numpy as np
+
 from Environment import Tic_Tac_Toe_State
 from Environment import Tic_Tac_Toe_State as new_TTT
 import Random_Agent
@@ -16,31 +20,43 @@ def playout(env, players, display=False):
 
 	observation, rewards, done = env.observation, env.rewards, env.done
 
+	memories = []
+
 	while 1:
 
 		if rewards == [0.5, 0.5]:
 			if display:
 				print("DRAW\n===========\n\n")
-			return rewards
+			memories.append([copy.deepcopy(prev_observation), copy.deepcopy(observation), done, copy.deepcopy(rewards), -1, "ENVIRONMENT", None])
+			break
 
 		if done:
 			if display:
 				print("WIN\n===========\n\n")
-			return rewards
+			memories.append([copy.deepcopy(prev_observation), copy.deepcopy(observation), done, copy.deepcopy(rewards), -1, "ENVIRONMENT", None])
+			break
 
-
-		prev_obs = observation
-		state, turn, _ = observation
+		prev_observation = copy.deepcopy(observation)
+		state, turn, move_number, _ = observation
 		player = players[turn]
 
 		if display: print("{} ({}) to move\n".format(["x","o"][turn], player.agentType))
 
 		action = player.move(observation)
-
 		observation, rewards, done = env.step(action)
+		memories.append([copy.deepcopy(prev_observation), copy.deepcopy(observation), done, copy.deepcopy(rewards), turn, player.agentType, action])
 
-		player.remember(done, action, observation, prev_obs)
+	for n in range(len(memories)-1):
+		cp_start_obs, cp_new_obs, cp_done, cp_rewards, cp_turn, cp_agent_type, cp_action = memories[n]
+		np_start_obs, np_new_obs, np_done, np_rewards, np_turn, np_agent_type, np_action = memories[n+1]
+		#final_rewards = memories[-2][3]
 
+		player = players[cp_turn]
+		# final_rewards[cp_turn]/((len(memories)-1)/(n+1))
+
+		player.remember(np_done, np_rewards[cp_turn], cp_action, np_new_obs, cp_start_obs)
+
+	return rewards
 
 
 def play(env, players, UID, display=True, randomize=False):
@@ -64,7 +80,7 @@ def play(env, players, UID, display=True, randomize=False):
 
 	for n in range(2):
 		if players[n].UID == UID:
-			if rewards[n] == 0:
+			if rewards[n] == -1:
 				return 0, 0, 1
 			if rewards[n] == 0.5:
 				return 0, 1, 0
@@ -74,7 +90,7 @@ def play(env, players, UID, display=True, randomize=False):
 
 if __name__ == '__main__':
 
-	random.seed(1)
+	#random.seed(2)
 
 	ENV = new_TTT()
 
@@ -83,7 +99,8 @@ if __name__ == '__main__':
 	Optimus = Optimal_Agent.Optimal()
 	Quill = QTable_Agent.QTable(0.1, 100)
 	Monte = MCTS_Agent.MCTS(1000)
-	Neura = NeuralNetwork_Agent.RLAgent(input_size=18, num_hidden=4, hidden_size=64, output_size=9, batch_size=64)
+	Neura = NeuralNetwork_Agent.RLAgent(input_size=27, num_hidden=0, hidden_size=0, output_size=9, batch_size=16)
+
 
 	# select agents types to player
 	p1 = Neura
@@ -91,7 +108,6 @@ if __name__ == '__main__':
 
 	players = [p1, p2]
 	player_to_track = 0
-
 	# Randomize which agent goes first each game?
 	Randomize = False
 
@@ -101,27 +117,35 @@ if __name__ == '__main__':
 
 	history = []
 	wins = 0
+	w=0
 	draws = 0
+	d=0
 	losses = 0
+	l=0
 
 	num_games = 10000
-	interval = 100
+	interval = 500
 
 	UID = players[player_to_track].UID
 
 	for n in range(num_games):
 
-		if (n + 1) % interval == 0:
-			print("Game {}".format(n + 1))
-
-
 		win, draw, lose = play(ENV, players, UID, display=False, randomize=Randomize)
 
 		wins += win
+		w += win
 		draws += draw
+		d += draw
 		losses += lose
+		l += lose
+		total = wins + draws + losses
 
-		averages = [100 * wins / (n + 1), 100 * draws / (n + 1), 100 * losses / (n + 1)]
+
+		if (n + 1) % interval == 0:
+			print(f"Game {n + 1} | Wins %: {100*w/interval} | Draws %: {100*d/interval} | Losses %: {100*l/interval}")
+			w, d, l = 0, 0, 0
+
+		averages = [100 * wins / total, 100 * draws / total, 100 * losses / total]
 		history.append(averages)
 
 	master = plt.figure()

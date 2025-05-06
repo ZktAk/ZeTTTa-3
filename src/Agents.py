@@ -20,6 +20,6 @@ class Agent:
 	def give_reward(self, reward):
 		pass
 
-	def remember(self, done, action, observation, prev_obs):
+	def remember(self, done, reward, action, observation, prev_obs):
 		pass
 
