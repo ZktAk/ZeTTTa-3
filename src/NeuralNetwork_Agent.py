@@ -1,3 +1,4 @@
+import copy
 import random
 import numpy as np
 from collections import deque
@@ -5,17 +6,21 @@ from BinHelp import bin_to_array, get_legal_indices
 from Agents import Agent
 import math
 
+#np.random.seed(1)
+
+def normalize(arr):
+	sum = np.sum(arr)
+	prob = arr / sum
+	return prob
+
 def relu(mat):
 	return np.multiply(mat, (mat > 0))
-
 
 def relu_derivative(mat):
 	return (mat > 0) * 1
 
-
 def sigmoid(mat):
 	return 1 / (1 + pow(math.e, -mat))
-
 
 class NNLayer:
 	# class representing a neural net layer
@@ -36,8 +41,6 @@ class NNLayer:
 	# Compute the forward pass for this layer
 	def forward(self, inputs, remember_for_backprop=True):
 		# inputs has shape batch_size x layer_input_size
-
-		#print(f"inputs: {inputs}\n")
 
 		input_with_bias = np.append(inputs, 1)
 		unactivated = None
@@ -99,15 +102,13 @@ class NNLayer:
 
 		return delta_i
 
-
 class RLAgent(Agent):
 	# class representing a reinforcement learning agent
 
-	def __init__(self, input_size, num_hidden, hidden_size, output_size, gamma=0.95, epsilon_decay=0.997,
+	def __init__(self, input_size, num_hidden, hidden_size, output_size, gamma=0.8, epsilon_decay=0.997,
 	             epsilon_min=0.01, batch_size=16):
 		super().__init__()
 		self.agentType = "NeuralNetwork"
-
 
 		self.input_size = input_size
 		self.num_hidden = num_hidden
@@ -117,9 +118,11 @@ class RLAgent(Agent):
 		self.epsilon_decay = epsilon_decay
 		self.epsilon_min = epsilon_min
 		self.batch_size = batch_size
+		self.epsilon = 1.0
+
+		self.current_piece = 0
 
 		self.memory = deque([], 1000000)
-		self.epsilon = 1.0
 
 		self.layers = [NNLayer(self.input_size + 1, self.hidden_size, activation=relu)]
 
@@ -129,34 +132,28 @@ class RLAgent(Agent):
 		self.layers.append(NNLayer(self.hidden_size + 1, self.output_size))
 
 
-
-	def get_observation(self, x_bitboard, y_bitboard, piece):
-
-		bitboard = x_bitboard << 9 | y_bitboard
-
-		input_layer = bin_to_array(bitboard, 18)
-		#input_layer.append(piece)
-
+	def get_observation(self, observation):
+		bitboards, piece, move_number, _ = observation
+		x_bitboard, y_bitboard, empty = bitboards
+		if piece == 1:
+			bitboard = y_bitboard << 18 | x_bitboard << 9 | empty
+		else:
+			bitboard = x_bitboard << 18 | y_bitboard << 9 | empty
+		#bitboard = x_bitboard << 9 | y_bitboard
+		input_layer = bin_to_array(bitboard, 27)
 		return input_layer
-
 
 	def move(self, observation):
 
-		bitboards, piece, env = observation
+		bitboards, piece, move_number, env = observation
 		x, y, empty = bitboards
-		obs = self.get_observation(x, y, piece)
-
-		values = self.forward(np.asmatrix(obs))
-
-		prev_values = values
+		obs = self.get_observation(copy.deepcopy(observation))
 		empty_array = bin_to_array(empty, 9)
 
-		for n in range(len(values)):
-			values[n] = sigmoid(values[n])
-			if empty_array[n] == 0:
-				values[n] = -1
-
+		values = self.forward(obs)
 		#print(f"Previous Values: {prev_values} \nEmpty Array: {empty_array} \nNew Values: {values}")
+
+		#print(len(self.memory))
 
 		if (np.random.random() > self.epsilon):
 			move = np.argmax(values)
@@ -164,11 +161,13 @@ class RLAgent(Agent):
 		else:
 			move = random.choice(get_legal_indices(bitboards))
 			#print(f"Random Move: {move}\n")
-
 		return move
 
 
 	def forward(self, observation, remember_for_backprop=True):
+
+		empty_array = observation[0:9]
+		#print(empty_array)
 
 		vals = np.copy(observation)
 		index = 0
@@ -177,38 +176,54 @@ class RLAgent(Agent):
 			vals = layer.forward(vals, remember_for_backprop)
 			index = index + 1
 
-		return vals
+		vals = np.array(vals)
+		sum = np.sum(vals)
+		prob = vals / sum
+
+		for n in range(len(prob)):
+			prob[n] = sigmoid(prob[n])
+			if empty_array[n] == 0:
+				prob[n] = 0
+
+		prob = prob + [val/100 for val in empty_array]
+		return prob
 
 
-	def remember(self, done, action, observation, prev_observation):
-		bitboards, piece, env = observation
-		x, y, empty = bitboards
-		obs = self.get_observation(x, y, piece)
+	def remember(self, done, reward, action, observation, prev_observation):
+		obs = self.get_observation(observation)
+		prev_obs = self.get_observation(prev_observation)
 
-		bitboards, piece, env = prev_observation
-		x, y, empty = bitboards
-		prev_obs = self.get_observation(x, y, piece)
-
-		self.memory.append([done, action, obs, prev_obs])
+		self.memory.append([done, reward, action, obs, prev_obs, prev_observation[-2]])
 		self.experience_replay()
 
 
 	def experience_replay(self):
 
-		if (len(self.memory) < self.batch_size):
+		if (len(self.memory) < 1000):#self.batch_size):
 			return
 		else:
 			batch_indices = np.random.choice(len(self.memory), self.batch_size)
 
 			for index in batch_indices:
-
-				done, action_selected, new_obs, prev_obs = self.memory[index]
+				done, reward, action_selected, new_obs, prev_obs, move_num = self.memory[index]
 				action_values = self.forward(prev_obs, remember_for_backprop=True)
 				next_action_values = self.forward(new_obs, remember_for_backprop=False)
 				experimental_values = np.copy(action_values)
 
-				experimental_values[action_selected] = 1 + self.gamma * np.max(next_action_values)
+				#print(reward)
 
+				experimental_values[action_selected] = reward + 0.5 + self.gamma * np.max(next_action_values)
+
+				#print("{}: {}".format(reward, experimental_values[action_selected]))
+
+				"""if done:
+					experimental_values[action_selected] = reward+1 #math.ceil(reward)
+					#print(reward, experimental_values[action_selected])
+				else:
+					n = 0.5 if move_num < 5 else 1
+					experimental_values[action_selected] = 0.5 + self.gamma * np.max(next_action_values)
+					#print(experimental_values[action_selected])
+					"""
 				self.backward(action_values, experimental_values)
 
 		self.epsilon = self.epsilon if self.epsilon < self.epsilon_min else self.epsilon * self.epsilon_decay
@@ -217,11 +232,9 @@ class RLAgent(Agent):
 			layer.update_time()
 			layer.update_stored_weights()
 
-	def backward(self, calculated_values, experimental_values):
 
+	def backward(self, calculated_values, experimental_values):
 		# values are batched = batch_size x output_size
 		delta = (calculated_values - experimental_values)
-
-		# print('delta = {}'.format(delta))
 		for layer in reversed(self.layers):
 			delta = layer.backward(delta)

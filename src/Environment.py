@@ -19,6 +19,7 @@ class Tic_Tac_Toe_State:
 
 		self.bitboards = None
 		self.current_move = None
+		self.move_counter = None
 		self.rewards = None
 		self.done = None
 		self.observation = None
@@ -34,18 +35,20 @@ class Tic_Tac_Toe_State:
 	def reset(self):
 		self.bitboards = [0b000000000, 0b000000000, 0b111111111]
 		self.current_move = 0  # 0 means that it is x's turn to move. 1 means it is o's turn to move
+		self.move_counter = 0
 		self.rewards = [0, 0]
 		self.done = False
 
 		self.render()
 
-		self.observation = [self.bitboards, self.current_move, self]
+		self.observation = [self.bitboards, self.current_move, self.move_counter, self]
 		return self.observation
 
 
 	def set(self, observation):
 		self.bitboards = observation[0]
 		self.current_move = observation[1]
+		self.move_counter = observation[2]
 		self.rewards = [0, 0]
 
 		self.done = self.check_terminal()
@@ -63,14 +66,17 @@ class Tic_Tac_Toe_State:
 
 		if sqaure & (self.bitboards[0] | self.bitboards[1]) > 0:
 			print("ERROR: Tic_Tac_Toe_State.step(): \'Square {} is already occupied\'".format(pretty_bin(sqaure, 9)))
-			return
+			self.done = True
+			self.rewards[self.current_move] = -100
+			return self.observation, self.rewards, self.done
 
 		self.bitboards[self.current_move] = self.bitboards[self.current_move] | sqaure
 		self.bitboards[2] = ~(self.bitboards[0] | self.bitboards[1]) & 0b111111111
 		self.current_move = 1 - self.current_move
 
-		self.observation = [self.bitboards, self.current_move, self]
 		self.done = self.check_terminal()
+		if not self.done: self.move_counter += 1
+		self.observation = [self.bitboards, self.current_move, self.move_counter, self]
 
 		self.render()
 
@@ -85,6 +91,7 @@ class Tic_Tac_Toe_State:
 			for piece in range(2):
 				if self.bitboards[piece] & pos == pos:
 					self.rewards[piece] = 1
+					self.rewards[1-piece] = -1
 					return True
 
 		# check if draw position
