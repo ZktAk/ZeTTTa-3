@@ -7,7 +7,7 @@ python3 main.py
 ```  
   
 # Currently Implemented Models  
-1. [Neural Network (work in progress)]()
+1. [Neural Network (work in progress)](#neural-network-vs-optimal)
 2. [Monte Carlo Tree Search (MCTS)](#mcts-vs-optimal)  
 3. [Tabular Q-Learning](#q-table-vs-optimal)
 4. [Random](#random-vs-optimal)  
