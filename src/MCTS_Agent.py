@@ -3,8 +3,7 @@ import math
 import random
 from Random_Agent import Random
 from Agents import Agent
-from main import playout
-from BinHelp import get_legal_indices
+from game_utils import get_legal_indices, playout
 
 
 class Node():
@@ -81,7 +80,7 @@ class MCTS(Agent):
         """
 
 		# Create a copy of the environment and disable rendering
-		environment = copy.deepcopy(observation[2])
+		environment = copy.deepcopy(observation[3])
 		render_mode = environment.render_mode
 		environment.render_mode = False
 

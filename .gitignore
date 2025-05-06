@@ -1,3 +1,4 @@
 .idea
 Test.py
 src/cumulative_accuracy.png
+src/moving_average_accuracy.png

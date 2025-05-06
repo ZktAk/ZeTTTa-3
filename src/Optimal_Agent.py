@@ -37,7 +37,7 @@ class Optimal(Agent):
             move = self.dictionary[key]
         except KeyError:
             # Print bitboards for debugging if the key is not found
-            from BinHelp import pretty_bin
+            from game_utils import pretty_bin
             print(f"{pretty_bin(x_bitboard, 9)} \n{pretty_bin(y_bitboard, 9)} \n{pretty_bin(_, 9)}")
 
         # Convert the move (bitmask) to a board index (0-8)

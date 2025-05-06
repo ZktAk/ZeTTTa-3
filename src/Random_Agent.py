@@ -1,5 +1,5 @@
 import random
-from BinHelp import get_legal_indices
+from game_utils import get_legal_indices
 from Agents import Agent
 
 

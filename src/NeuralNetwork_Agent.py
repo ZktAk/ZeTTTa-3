@@ -2,7 +2,7 @@ import copy
 import random
 import numpy as np
 from collections import deque
-from BinHelp import bin_to_array, get_legal_indices
+from game_utils import bin_to_array, get_legal_indices
 from Agents import Agent
 import math
 

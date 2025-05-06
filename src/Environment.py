@@ -1,4 +1,4 @@
-from BinHelp import pretty_bin, get_bit
+from game_utils import pretty_bin, get_bit
 
 
 class Tic_Tac_Toe_State:

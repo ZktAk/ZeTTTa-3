@@ -1,69 +1,15 @@
-import copy
 import random
+from collections import deque
+
 import matplotlib.pyplot as plt
 
 from Environment import Tic_Tac_Toe_State as TTT
+from game_utils import playout
 import Random_Agent
 import Optimal_Agent
 import QTable_Agent
 import MCTS_Agent
 import NeuralNetwork_Agent
-
-
-def playout(env, players, display=False):
-	"""Simulate a single Tic-Tac-Toe game between two players.
-
-	Args:
-	   env (Tic_Tac_Toe_State): The Tic-Tac-Toe environment.
-	   players (list): List of two player agents.
-	   display (bool): If True, print game progress and results.
-
-	Returns:
-	   list: Final rewards for both players.
-	"""
-	env.render_mode = display  # Set rendering mode
-	observation, rewards, done = env.observation, env.rewards, env.done
-	memories = []  # Store game states for player learning
-
-	while True:
-		# Handle draw case
-		if rewards == [0.5, 0.5]:
-			if display:
-				print("DRAW\n===========\n\n")
-			memories.append([copy.deepcopy(prev_observation), copy.deepcopy(observation), done, copy.deepcopy(rewards), -1, "ENVIRONMENT", None])
-			break
-
-		# Handle win/loss case
-		if done:
-			if display:
-				print("WIN\n===========\n\n")
-			memories.append([copy.deepcopy(prev_observation), copy.deepcopy(observation), done, copy.deepcopy(rewards), -1, "ENVIRONMENT", None])
-			break
-
-		prev_observation = copy.deepcopy(observation)  # Save current state
-		state, turn, move_number, _ = observation  # Unpack observation
-		player = players[turn]  # Select current player
-
-		if display:
-			print("{} ({}) to move\n".format(["x","o"][turn], player.agentType))
-
-		action = player.move(observation)  # Get player's move
-		observation, rewards, done = env.step(action)  # Update environment
-		memories.append([copy.deepcopy(prev_observation), copy.deepcopy(observation), done, copy.deepcopy(rewards), turn, player.agentType, action])
-
-	# Update player memory with game outcomes
-	for n in range(len(memories)-1):
-		cp_start_obs, cp_new_obs, cp_done, cp_rewards, cp_turn, cp_agent_type, cp_action = memories[n]
-		np_start_obs, np_new_obs, np_done, np_rewards, np_turn, np_agent_type, np_action = memories[n+1]
-		#final_rewards = memories[-2][3]
-
-		player = players[cp_turn]
-		# final_rewards[cp_turn]/((len(memories)-1)/(n+1))
-
-		player.remember(np_done, np_rewards[cp_turn], cp_action, np_new_obs, cp_start_obs)
-
-	return rewards
-
 
 def play(env, players, UID, display=True, randomize=False):
 	"""Play a single Tic-Tac-Toe game, optionally randomizing player order.
@@ -128,41 +74,70 @@ if __name__ == '__main__':
 	print("Started...")
 
 	# Initialize tracking variables
-	history = []  # Store win/draw/loss percentages
-	wins, draws, losses = 0, 0, 0
+	num_games = 2_000  # Total games to play
+	interval = 100  # Window size for moving average and reporting interval
+	history = []  # Store moving average win/draw/loss percentages over the last interval games
+	cumulative_history = []  # Store cumulative win/draw/loss percentages
+	game_results = deque(maxlen=interval)  # Rolling window of game outcomes (win, draw, lose)
+	wins, draws, losses = 0, 0, 0  # Cumulative counters
 	w, d, l = 0, 0, 0  # Interval counters
-	num_games = 10000  # Total games to play
-	interval = 500  # Reporting interval
+
 	UID = players[player_to_track].UID  # UID of tracked player
 
 	# Run games and track results
 	for n in range(num_games):
 		win, draw, lose = play(ENV, players, UID, display=False, randomize=Randomize)
+		game_results.append((win, draw, lose))  # Store game outcome
 		wins += win
-		w += win
 		draws += draw
-		d += draw
 		losses += lose
+		total = n + 1  # Total games played so far
+
+		# Sum wins, draws, and losses over the current window for moving average
+		moving_wins = sum(result[0] for result in game_results)
+		moving_draws = sum(result[1] for result in game_results)
+		moving_losses = sum(result[2] for result in game_results)
+		moving_total = len(game_results)  # Number of games in the current window
+
+		# Calculate and store moving average percentages
+		moving_averages = [100 * moving_wins / moving_total if moving_total > 0 else 0,
+		                   100 * moving_draws / moving_total if moving_total > 0 else 0,
+		                   100 * moving_losses / moving_total if moving_total > 0 else 0]
+		history.append(moving_averages)
+
+		# Calculate and store cumulative percentages
+		cumulative_averages = [100 * wins / total, 100 * draws / total, 100 * losses / total]
+		cumulative_history.append(cumulative_averages)
+
+		# Update interval counters
+		w += win
+		d += draw
 		l += lose
-		total = wins + draws + losses
 
 		# Print interval statistics
 		if (n + 1) % interval == 0:
-			print(f"Game {n + 1} | Wins %: {100*w/interval} | Draws %: {100*d/interval} | Losses %: {100*l/interval}")
+			print(
+				f"Game {n + 1} | Wins %: {100 * w / interval} | Draws %: {100 * d / interval} | Losses %: {100 * l / interval}")
 			w, d, l = 0, 0, 0  # Reset interval counters
 
-		# Calculate and store cumulative percentages
-		averages = [100 * wins / total, 100 * draws / total, 100 * losses / total]
-		history.append(averages)
-
-	# Plot cumulative win/draw/loss percentages
-	master = plt.figure()
+	# Plot moving average win/draw/loss percentages
+	plt.figure()
 	plt.plot(history)
 	plt.xlabel("Number of Games")
-	plt.ylabel("Percentage")
+	plt.ylabel(f"Moving Average Percentage ({interval}-game window)")
+	plt.savefig("moving_average_accuracy.png")
+
+	# Plot cumulative win/draw/loss percentages
+	plt.figure()
+	plt.plot(cumulative_history)
+	plt.xlabel("Number of Games")
+	plt.ylabel("Cumulative Percentage")
 	plt.savefig("cumulative_accuracy.png")
 
 	# Print final statistics for the tracked player
-	print("\n{} Win Percentage: {}%".format(names[player_to_track], history[-1][0]))
-	print("{} Draw Percentage: {}%".format(names[player_to_track], history[-1][1]))
-	print("{} Loss Percentage: {}%".format(names[player_to_track], history[-1][2]))
+	print(f"\n{names[player_to_track]} Win Percentage (Moving Average): {history[-1][0]}%")
+	print(f"{names[player_to_track]} Draw Percentage (Moving Average): {history[-1][1]}%")
+	print(f"{names[player_to_track]} Loss Percentage (Moving Average): {history[-1][2]}%")
+	print(f"\n{names[player_to_track]} Win Percentage (Cumulative): {cumulative_history[-1][0]}%")
+	print(f"{names[player_to_track]} Draw Percentage (Cumulative): {cumulative_history[-1][1]}%")
+	print(f"{names[player_to_track]} Loss Percentage (Cumulative): {cumulative_history[-1][2]}%")
