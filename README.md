@@ -1,4 +1,15 @@
-# Tic-Tac-Toe_AI  
+# Zeta-T3
+
+Dive into Zeta-T3, a raw Python showdown where AI agents battle it out on the 3x3 Tic-Tac-Toe grid! 
+“Zeta” is our fearless AI pioneer, and “T3” marks the classic 3x3 board, a solved game where draws 
+reign supreme. From a scrappy neural net swapping X and O strategies to a Q-Learning champ hitting 
+100% draws, and an MCTS strategist simulating thousands of games, Zeta-T3 pits these agents against 
+a flawless Optimal foe, scoring ~96–100% draw rates. Built without fancy libraries like pytorch or 
+tensorflow, but pure code and grit, this arena tests RL smarts in a perfect playground. It’s the 
+first strike in the Zeta saga, with Zeta-T9, Zeta-Check, and Zeta-Knight planned for ultimate tic tac 
+toe, checkers, and chess, respectively. Ready to see AI rise? Game on!
+
+---
 
 This project implements Tic-Tac-Toe solvers using various AI and 
 machine learning algorithms. Tic-Tac-Toe is a solved game: X moves 
