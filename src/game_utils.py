@@ -1,5 +1,6 @@
 import copy
 
+
 def playout(env, players, display=False):
 	"""Simulate a single Tic-Tac-Toe game between two players.
 
@@ -42,6 +43,7 @@ def playout(env, players, display=False):
 		observation, rewards, done = env.step(action)  # Update environment
 		memories.append([copy.deepcopy(prev_observation), copy.deepcopy(observation), done, copy.deepcopy(rewards), turn, player.agentType, action])
 
+	game_result = memories[-1][3]
 	# Update player memory with game outcomes
 	for n in range(len(memories)-1):
 		cp_start_obs, cp_new_obs, cp_done, cp_rewards, cp_turn, cp_agent_type, cp_action = memories[n]
@@ -51,7 +53,7 @@ def playout(env, players, display=False):
 		player = players[cp_turn]
 		# final_rewards[cp_turn]/((len(memories)-1)/(n+1))
 
-		player.remember(np_done, np_rewards[cp_turn], cp_action, np_new_obs, cp_start_obs)
+		player.remember(np_done, np_rewards[cp_turn], cp_action, np_new_obs, cp_start_obs, game_result[cp_turn])
 
 	return rewards
 

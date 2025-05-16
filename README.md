@@ -43,16 +43,30 @@ Agents were tested against the Optimal Agent, which enforces a draw or win due t
 ### Neural Network vs Optimal
   
  
-The Neural Network ran 2,000 games as X against the Optimal Agent, non-randomized. The moving average (100-game window) graph tracks performance.   
+The Neural Network ran 3,000 games as X against the Optimal Agent, non-randomized. The moving average (100-game window) graph tracks performance.   
 
-![cumulative_accuracy](graphs/NeuralNetwork_vs_Optimal-moving_average_accuracy.png)    
+![cumulative_accuracy](graphs/NN-X-moving_average_accuracy.png)    
 
 Accuracy (last 100 games):      
 NN Win Percentage: 0.0%      
-NN Draw Percentage: 98.0%      
-NN Loss Percentage: 2.0%  
+NN Draw Percentage: 97.0%      
+NN Loss Percentage: 3.0%  
 
-The 98% draw rate shows the Neural Network approaches optimal play as X in a solved game. No wins align with the Optimal Agent’s perfection. The 2% losses suggest some residual random/exploratory play .
+The Neural Network was then ran another 3,000 games, but this time as O against the Optimal Agent, non-randomized. The moving average (100-game window) graph tracks performance.   
+
+![cumulative_accuracy](graphs/NN-O-moving_average_accuracy.png)    
+
+Accuracy (last 100 games):      
+NN Win Percentage: 0.0%      
+NN Draw Percentage: 99.0%      
+NN Loss Percentage: 1.0%  
+
+Random seeds where tested until one was found that led to good training of the NN for both pieces. And although the NN still does not learn with randomized play even with this seed, the current implementation could be configured to have two separate neural networks to handle each piece. We could train separate weights (weights_x.pkl for X, weights_o.pkl for O) and load the right one based on the piece. Regardless, the current implementation proves the concept: a raw Python NN can learn Tic-Tac-Toe strategies from scratch, hitting ~97–99% draw rates against a perfect opponent. This is sufficient for now. 
+
+What’s Next?
+
+Porting to PyTorch or TensorFlow for faster training and maybe tackling randomized play. For now, this showcase shows what raw Python RL can do.
+
 ***    
 ### MCTS vs Optimal
   

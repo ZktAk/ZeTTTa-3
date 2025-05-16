@@ -1,12 +1,23 @@
 import copy
+import os
 import random
 import numpy as np
 from collections import deque
 from game_utils import bin_to_array, get_legal_indices
 from Agents import Agent
 import math
+import pickle
 
-# np.random.seed(1)  # Commented out for testing/debugging purposes
+# For finding a good seed
+import time
+# int(time.time())
+
+seed = 1746882340
+random.seed(seed)
+np.random.seed(seed)
+
+def get_seed():
+	return seed
 
 def normalize(arr):
 	"""Normalize an array to sum to 1.
@@ -203,11 +214,33 @@ class RLAgent(Agent):
 		self.current_piece = 0              # Current player's piece (0 for x, 1 for o)
 		self.memory = deque([], 1000000)    # Memory buffer for experience replay
 
+		self.total_wins = 0
+		self.total_draws = 0
+		self.total_losses = 0
+
 		# Initialize neural network layers
-		self.layers = [NNLayer(self.input_size + 1, self.hidden_size, activation=relu)]
-		for i in range(self.num_hidden - 1):
-			self.layers.append(NNLayer(self.hidden_size + 1, self.hidden_size, activation=relu))
-		self.layers.append(NNLayer(self.hidden_size + 1, self.output_size))
+		self.layers = []
+		if num_hidden == 0:
+			self.layers.append(NNLayer(self.input_size + 1, self.output_size, activation=relu))
+			#self.layers.append(NNLayer(self.input_size + 1, self.output_size))
+		else:
+			self.layers.append(NNLayer(self.input_size + 1, self.hidden_size, activation=relu))
+			for i in range(self.num_hidden - 1):
+				self.layers.append(NNLayer(self.hidden_size + 1, self.hidden_size, activation=relu))
+			self.layers.append(NNLayer(self.hidden_size + 1, self.output_size))
+
+		self.weights_dir = "weights"
+		if not os.path.exists(self.weights_dir):
+			os.makedirs(self.weights_dir)
+		self.move_count = 0
+
+	def save_weights(self):
+		"""Save weights of all layers after a move."""
+		weights = [layer.weights for layer in self.layers]
+		weight_file = os.path.join(self.weights_dir, f"weights_move_{self.move_count}.pkl")
+		with open(weight_file, 'wb') as f:
+			pickle.dump({'weights': weights}, f)
+		self.move_count += 1
 
 
 	def get_observation(self, observation):
@@ -223,12 +256,13 @@ class RLAgent(Agent):
 		x_bitboard, y_bitboard, empty = bitboards
 		# Combine bitboards into a single value, adjusting for player perspective
 		if piece == 1:
-			bitboard = y_bitboard << 18 | x_bitboard << 9 | empty
+			bitboard = y_bitboard << 9 | x_bitboard
 		else:
-			bitboard = x_bitboard << 18 | y_bitboard << 9 | empty
+			bitboard = x_bitboard << 9 | y_bitboard
 		#bitboard = x_bitboard << 9 | y_bitboard  # Commented out for testing/debugging purposes
-		input_layer = bin_to_array(bitboard, 27)  # Convert to array
-		return input_layer
+		input_layer = bin_to_array(bitboard, 18)  # Convert to array
+		#input_layer.append(piece)
+		return input_layer, bin_to_array(empty, 9)
 
 	def move(self, observation):
 		"""Select a move using the neural network or random exploration.
@@ -240,11 +274,9 @@ class RLAgent(Agent):
             int: The index (0-8) of the chosen move.
         """
 		bitboards, piece, move_number, env = observation
-		x, y, empty = bitboards
-		obs = self.get_observation(copy.deepcopy(observation))
-		empty_array = bin_to_array(empty, 9)  # Array indicating empty squares
+		obs, empty = self.get_observation(copy.deepcopy(observation))
 
-		values = self.forward(obs) # Get move probabilities
+		values = self.forward(obs, empty) # Get move probabilities
 
 		# Following code commented out for testing/debugging purposes
 		#print(f"Previous Values: {prev_values} \nEmpty Array: {empty_array} \nNew Values: {values}")
@@ -260,7 +292,7 @@ class RLAgent(Agent):
 		return move
 
 
-	def forward(self, observation, remember_for_backprop=True):
+	def forward(self, observation, empty_array, remember_for_backprop=True, illegal_mask=True):
 		"""Compute the forward pass through the neural network.
 
         Args:
@@ -270,7 +302,7 @@ class RLAgent(Agent):
         Returns:
             np.ndarray: Probabilities for each move, adjusted for legal moves.
         """
-		empty_array = observation[0:9]  # Extract empty squares
+		#empty_array = observation[0:9]  # Extract empty squares
 		#print(empty_array)  # Commented out for testing/debugging purposes
 
 		vals = np.copy(observation)
@@ -285,14 +317,16 @@ class RLAgent(Agent):
 		# Apply sigmoid and mask illegal moves
 		for n in range(len(prob)):
 			prob[n] = sigmoid(prob[n])
-			if empty_array[n] == 0:
+			if illegal_mask and empty_array[n] == 0:
 				prob[n] = 0
 
-		prob = prob + [val/100 for val in empty_array]  # Slightly favor empty squares
+		# slightly increase the prob of the legal moves so that even
+		# if all values are initially zero, it won't choose an illegal move
+		prob = prob + [val/100 for val in empty_array]
 		return prob
 
 
-	def remember(self, done, reward, action, observation, prev_observation):
+	def remember(self, done, reward, action, observation, prev_observation, game_result):
 		"""Store an experience in memory for experience replay.
 
         Args:
@@ -302,39 +336,56 @@ class RLAgent(Agent):
             observation (list): Current game state.
             prev_observation (list): Previous game state.
         """
-		obs = self.get_observation(observation)
-		prev_obs = self.get_observation(prev_observation)
-		self.memory.append([done, reward, action, obs, prev_obs, prev_observation[-2]])  # Store experience
+
+		r = False
+
+		#print(max([self.total_wins, self.total_draws, self.total_losses]))
+
+		#print(game_result)
+
+		if game_result == 1:
+			if self.total_wins <= self.total_draws or self.total_wins <= self.total_losses:
+				self.total_wins += 1
+			else:
+				r = True
+		elif game_result == 0.5:
+			if True: #self.total_draws <= self.total_wins or self.total_draws <= self.total_losses:
+				self.total_draws += 1
+			else:
+				r = True
+		else:
+			if self.total_losses <= self.total_draws * 2 or self.total_losses <= self.total_wins:
+				self.total_losses += 1
+			else:
+				r = True
+
+		if r:
+			return
+
+		#print(f"Wins: {self.total_wins} | Draws: {self.total_draws} | Losses: {self.total_losses}")
+
+		obs, empty = self.get_observation(observation)
+		prev_obs, prev_empt = self.get_observation(prev_observation)
+		self.memory.append([done, reward, action, obs, empty, prev_obs, prev_empt, prev_observation[-2], game_result])  # Store experience
+		#self.save_weights()
 		self.experience_replay()
 
 	def experience_replay(self):
 		"""Perform experience replay to train the neural network."""
-		if (len(self.memory) < 1000):  # Wait until enough experiences are collected
+		if (len(self.memory) < 100):  # Wait until enough experiences are collected
 			return
 
 		# Sample a batch of experiences
 		batch_indices = np.random.choice(len(self.memory), self.batch_size)
 
 		for index in batch_indices:
-			done, reward, action_selected, new_obs, prev_obs, move_num = self.memory[index]
-			action_values = self.forward(prev_obs, remember_for_backprop=True)  # Predicted Q-values
-			next_action_values = self.forward(new_obs, remember_for_backprop=False)  # Next state Q-values
-			experimental_values = np.copy(action_values)
+			done, reward, action_selected, new_obs, new_empty, prev_obs, prev_empt, move_num, game_result = self.memory[index]
 
-			# Update Q-value for the selected action
-			experimental_values[action_selected] = reward + 0.5 + self.gamma * np.max(next_action_values)
+			action_values = self.forward(prev_obs, prev_empt, remember_for_backprop=True, illegal_mask=False)  # Predicted Q-values
+			next_action_values = self.forward(new_obs, new_empty, remember_for_backprop=False)  # Next state Q-values
+			experimental_values = self.forward(prev_obs, prev_empt, remember_for_backprop=False, illegal_mask=True)
 
-			# The following commented-out code is for testing/debugging purposes
-			# print(reward)
-			#print("{}: {}".format(reward, experimental_values[action_selected]))
-			"""if done:
-				experimental_values[action_selected] = reward+1 #math.ceil(reward)
-				#print(reward, experimental_values[action_selected])
-			else:
-				n = 0.5 if move_num < 5 else 1
-				experimental_values[action_selected] = 0.5 + self.gamma * np.max(next_action_values)
-				#print(experimental_values[action_selected])
-			"""
+			experimental_values[action_selected] = self.gamma * np.max(next_action_values) if not done else reward
 			self.backward(action_values, experimental_values)  # Backpropagate error
 
 		# Decay exploration probability
@@ -356,3 +407,6 @@ class RLAgent(Agent):
 		delta = (calculated_values - experimental_values)  # Compute error
 		for layer in reversed(self.layers):
 			delta = layer.backward(delta)  # Backpropagate error through layers
+
+	def give_reward(self, reward):
+		self.save_weights()

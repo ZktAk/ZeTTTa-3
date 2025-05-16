@@ -34,7 +34,7 @@ class Agent:
         """
 		pass
 
-	def remember(self, done, reward, action, observation, prev_obs):
+	def remember(self, done, reward, action, observation, prev_obs, game_result):
 		"""Placeholder method for storing experience for learning.
 
         Args:

@@ -2,3 +2,5 @@
 Test.py
 src/cumulative_accuracy.png
 src/moving_average_accuracy.png
+src/weights
+src/visualize_network.py

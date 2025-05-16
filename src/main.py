@@ -1,4 +1,5 @@
 import random
+import time
 from collections import deque
 
 import matplotlib.pyplot as plt
@@ -10,6 +11,11 @@ import Optimal_Agent
 import QTable_Agent
 import MCTS_Agent
 import NeuralNetwork_Agent
+
+
+#seed = 1746882340 #int(time.time())  # or: seed = random.SystemRandom().randint(0, 2**32 - 1)
+#random.seed(seed)
+
 
 def play(env, players, UID, display=True, randomize=False):
 	"""Play a single Tic-Tac-Toe game, optionally randomizing player order.
@@ -60,21 +66,21 @@ if __name__ == '__main__':
 	Optimus = Optimal_Agent.Optimal()
 	Quill = QTable_Agent.QTable(0.1, 100)
 	Monte = MCTS_Agent.MCTS(1000)
-	Neura = NeuralNetwork_Agent.RLAgent(input_size=27, num_hidden=0, hidden_size=0, output_size=9, batch_size=16)
+	Neura = NeuralNetwork_Agent.RLAgent(input_size=18, num_hidden=1, hidden_size=18, output_size=9, batch_size=16)
 
 
 	# Select agents to play
 	p1 = Neura
 	p2 = Optimus
-	players = [p1, p2]
-	player_to_track = 0  # Index of the player to track
+	players = [p2, p1]
+	player_to_track = 1  # Index of the player to track
 	Randomize = False  # Whether to randomize player order
 
 	names = [players[0].agentType, players[1].agentType]  # Agent type names
 	print("Started...")
 
 	# Initialize tracking variables
-	num_games = 2_000  # Total games to play
+	num_games = 3000  # Total games to play
 	interval = 100  # Window size for moving average and reporting interval
 	history = []  # Store moving average win/draw/loss percentages over the last interval games
 	cumulative_history = []  # Store cumulative win/draw/loss percentages
@@ -141,3 +147,6 @@ if __name__ == '__main__':
 	print(f"\n{names[player_to_track]} Win Percentage (Cumulative): {cumulative_history[-1][0]}%")
 	print(f"{names[player_to_track]} Draw Percentage (Cumulative): {cumulative_history[-1][1]}%")
 	print(f"{names[player_to_track]} Loss Percentage (Cumulative): {cumulative_history[-1][2]}%")
+
+#print(f"main.seed: {seed}")
+#print(f"NN.seed: {NeuralNetwork_Agent.get_seed()}")
